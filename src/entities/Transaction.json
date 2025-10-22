@@ -1,0 +1,74 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da transa\u00e7\u00e3o"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Valor da transa\u00e7\u00e3o"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da transa\u00e7\u00e3o"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "alimentacao",
+        "transporte",
+        "moradia",
+        "saude",
+        "lazer",
+        "educacao",
+        "cartao",
+        "outros"
+      ],
+      "description": "Categoria da transa\u00e7\u00e3o"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "receita",
+        "despesa"
+      ],
+      "description": "Tipo de transa\u00e7\u00e3o"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "dinheiro",
+        "cartao_credito",
+        "cartao_debito",
+        "pix",
+        "transferencia"
+      ],
+      "description": "Forma de pagamento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "pago",
+        "atrasado"
+      ],
+      "default": "pendente",
+      "description": "Status da transa\u00e7\u00e3o"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 uma despesa fixa recorrente"
+    }
+  },
+  "required": [
+    "description",
+    "amount",
+    "date",
+    "category",
+    "type"
+  ]
+}

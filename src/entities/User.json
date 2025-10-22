@@ -1,0 +1,58 @@
+{
+  "type": "object",
+  "properties": {
+    "gross_salary": {
+      "type": "number",
+      "description": "Sal\u00e1rio bruto mensal"
+    },
+    "net_salary": {
+      "type": "number",
+      "description": "Sal\u00e1rio l\u00edquido mensal"
+    },
+    "fixed_expenses": {
+      "type": "object",
+      "description": "Despesas fixas mensais",
+      "properties": {
+        "cartao": {
+          "type": "number"
+        },
+        "aluguel": {
+          "type": "number"
+        },
+        "energia": {
+          "type": "number"
+        },
+        "agua": {
+          "type": "number"
+        },
+        "telefone": {
+          "type": "number"
+        },
+        "internet": {
+          "type": "number"
+        },
+        "mercado": {
+          "type": "number"
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": [
+            "light",
+            "dark"
+          ],
+          "default": "dark"
+        },
+        "currency": {
+          "type": "string",
+          "default": "BRL"
+        }
+      }
+    }
+  },
+  "name": "User"
+}
