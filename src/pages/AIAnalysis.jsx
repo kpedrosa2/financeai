@@ -7,9 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import FinancialReport from "../components/analysis/FinancialReport";
-import PredictiveAnalysis from "../components/analysis/PredictiveAnalysis";
-import Recommendations from "../components/analysis/Recommendations";
 import SavingsSimulator from "../components/analysis/SavingsSimulator";
 
 export default function AIAnalysis() {
