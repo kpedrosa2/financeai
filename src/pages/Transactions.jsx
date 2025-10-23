@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { Plus, Filter, Download, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "../components/utils/formatters";
 
 import TransactionForm from "../components/transactions/TransactionForm";
 import TransactionList from "../components/transactions/TransactionList";
@@ -111,7 +112,7 @@ export default function Transactions() {
     if (debts.length > 0 && transactions.length > 0) {
       generateDebtTransactions();
     }
-  }, [debts]);
+  }, [debts, transactions]); // Added transactions to dependency array to prevent infinite loop
 
   const handleSubmit = async (data) => {
     // Se for transação recorrente, criar para todos os meses restantes do ano
@@ -210,7 +211,7 @@ export default function Transactions() {
 
   React.useEffect(() => {
     transactions.forEach(checkDueAlerts);
-  }, [transactions]);
+  }, [transactions, updateMutation]); // Added updateMutation to dependency array
 
   const filteredTransactions = transactions.filter(t => {
     const tDate = new Date(t.date);

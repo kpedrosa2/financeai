@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import GoalForm from "../components/goals/GoalForm";
 import GoalCard from "../components/goals/GoalCard";
 import GoalProgress from "../components/goals/GoalProgress";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "../components/utils/formatters";
 
 export default function Goals() {
   const [showForm, setShowForm] = useState(false);

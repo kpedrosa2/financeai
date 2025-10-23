@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatCurrency } from "../utils/formatters";
 
 export default function GoalCard({ goal, onEdit, onDelete, onContribute }) {
   const [showContribute, setShowContribute] = useState(false);

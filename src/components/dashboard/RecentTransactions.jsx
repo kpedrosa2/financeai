@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/utils/formatters"; // Corrected import path
 
 const categoryIcons = {
   alimentacao: "🍽️",
@@ -60,7 +62,7 @@ export default function RecentTransactions({ transactions }) {
                 <div className="flex items-center gap-2">
                   <div className="text-right">
                     <p className={`font-bold ${transaction.type === 'receita' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {transaction.type === 'receita' ? '+' : '-'} R$ {transaction.amount.toFixed(2)}
+                      {transaction.type === 'receita' ? '+' : '-'} {formatCurrency(transaction.amount)}
                     </p>
                     <Badge
                       variant="secondary"

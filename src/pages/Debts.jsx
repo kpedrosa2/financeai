@@ -11,7 +11,7 @@ import DebtForm from "../components/debts/DebtForm";
 import DebtList from "../components/debts/DebtList";
 import DebtSimulator from "../components/debts/DebtSimulator";
 import DebtStrategy from "../components/debts/DebtStrategy";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "../components/utils/formatters";
 
 export default function Debts() {
   const [showForm, setShowForm] = useState(false);

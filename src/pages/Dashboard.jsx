@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "../components/utils/formatters";
 
 import StatsCard from "../components/dashboard/StatsCard";
 import SpendingChart from "../components/dashboard/SpendingChart";

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { Pencil, Trash2, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "../utils/formatters";
 
 export default function DebtList({ debts, isLoading, onEdit, onDelete, onSelect }) {
   if (isLoading) {
@@ -37,7 +39,9 @@ export default function DebtList({ debts, isLoading, onEdit, onDelete, onSelect 
         ) : (
           debts.map((debt) => {
             const progress = ((debt.installments_paid || 0) / debt.installments) * 100;
-            const monthlyPayment = debt.current_amount / (debt.installments - (debt.installments_paid || 0));
+            // Ensure division by zero is handled, especially if installments_paid equals installments causing the denominator to be 0
+            const remainingInstallments = debt.installments - (debt.installments_paid || 0);
+            const monthlyPayment = remainingInstallments > 0 ? debt.current_amount / remainingInstallments : debt.current_amount; // If no remaining installments, monthly payment is just the current amount (or 0 if debt is fully paid)
             
             return (
               <div
@@ -67,11 +71,11 @@ export default function DebtList({ debts, isLoading, onEdit, onDelete, onSelect 
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
                     <p className="text-xs text-purple-300">Valor Atual</p>
-                    <p className="text-lg font-bold text-rose-400">R$ {debt.current_amount.toFixed(2)}</p>
+                    <p className="text-lg font-bold text-rose-400">{formatCurrency(debt.current_amount)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-purple-300">Parcela Mensal</p>
-                    <p className="text-lg font-bold text-white">R$ {monthlyPayment.toFixed(2)}</p>
+                    <p className="text-lg font-bold text-white">{formatCurrency(monthlyPayment)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-purple-300">Taxa de Juros</p>

@@ -13,7 +13,7 @@ import { Plus, TrendingUp, Calendar, DollarSign, Pencil, Trash2 } from "lucide-r
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { formatCurrency } from "@/utils/formatters"; // Added import
+import { formatCurrency } from "../utils/formatters"; // Corrected import path
 
 export default function InvestmentSection({ investments, isLoading }) {
   const [showForm, setShowForm] = useState(false);

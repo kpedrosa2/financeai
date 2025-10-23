@@ -1,6 +1,8 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { formatCurrency } from "../utils/formatters";
 
 export default function MonthlyOverview({ transactions, netSalary }) {
   // Agrupar por mês nos últimos 6 meses

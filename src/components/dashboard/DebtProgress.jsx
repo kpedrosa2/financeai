@@ -1,7 +1,9 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AlertTriangle } from "lucide-react";
+import { formatCurrency } from "../utils/formatters"; // Added import
 
 export default function DebtProgress({ debts }) {
   const activeDebts = debts.filter(d => d.status === 'ativa').slice(0, 4);

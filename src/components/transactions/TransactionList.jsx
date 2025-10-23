@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,7 +8,7 @@ import { Pencil, Trash2, Check, AlertTriangle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency } from "../utils/formatters";
 
 const categoryLabels = {
   aluguel_financiamento: "Aluguel",

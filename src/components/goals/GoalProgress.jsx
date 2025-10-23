@@ -1,6 +1,8 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { formatCurrency } from "../utils/formatters";
 
 export default function GoalProgress({ goals }) {
   const data = goals.map(goal => ({
