@@ -21,26 +21,7 @@ export default function TransactionFilters({ filters, onFilterChange }) {
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="receita">Receitas</SelectItem>
                 <SelectItem value="despesa">Despesas</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-purple-300">Categoria</Label>
-            <Select value={filters.category} onValueChange={(value) => onFilterChange({ ...filters, category: value })}>
-              <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="alimentacao">Alimentação</SelectItem>
-                <SelectItem value="transporte">Transporte</SelectItem>
-                <SelectItem value="moradia">Moradia</SelectItem>
-                <SelectItem value="saude">Saúde</SelectItem>
-                <SelectItem value="lazer">Lazer</SelectItem>
-                <SelectItem value="educacao">Educação</SelectItem>
-                <SelectItem value="cartao">Cartão</SelectItem>
-                <SelectItem value="outros">Outros</SelectItem>
+                <SelectItem value="investimento">Investimentos</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -88,6 +69,23 @@ export default function TransactionFilters({ filters, onFilterChange }) {
                     {year}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-purple-300">Categoria</Label>
+            <Select value={filters.category} onValueChange={(value) => onFilterChange({ ...filters, category: value })}>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="aluguel_financiamento">Aluguel</SelectItem>
+                <SelectItem value="supermercado">Supermercado</SelectItem>
+                <SelectItem value="combustivel">Combustível</SelectItem>
+                <SelectItem value="farmacia">Farmácia</SelectItem>
+                <SelectItem value="salario">Salário</SelectItem>
               </SelectContent>
             </Select>
           </div>

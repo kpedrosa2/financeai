@@ -1,0 +1,72 @@
+{
+  "name": "Investment",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do investimento"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "poupanca",
+        "acoes",
+        "tesouro_direto",
+        "cdb",
+        "lci_lca",
+        "fundos",
+        "criptomoedas",
+        "previdencia",
+        "outros"
+      ],
+      "description": "Tipo de investimento"
+    },
+    "initial_amount": {
+      "type": "number",
+      "description": "Valor aplicado inicialmente"
+    },
+    "current_amount": {
+      "type": "number",
+      "description": "Valor atual do investimento"
+    },
+    "application_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da aplica\u00e7\u00e3o"
+    },
+    "yield_rate": {
+      "type": "number",
+      "description": "Rentabilidade (% ao ano)"
+    },
+    "expected_return": {
+      "type": "number",
+      "description": "Rendimento esperado"
+    },
+    "redemption_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de resgate prevista"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "resgatado",
+        "vencido"
+      ],
+      "default": "ativo",
+      "description": "Status do investimento"
+    },
+    "monthly_contribution": {
+      "type": "number",
+      "description": "Aporte mensal"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "initial_amount",
+    "application_date",
+    "yield_rate"
+  ]
+}

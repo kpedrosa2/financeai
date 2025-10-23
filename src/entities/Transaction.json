@@ -18,13 +18,91 @@
     "category": {
       "type": "string",
       "enum": [
-        "alimentacao",
-        "transporte",
-        "moradia",
-        "saude",
-        "lazer",
-        "educacao",
-        "cartao",
+        "aluguel_financiamento",
+        "condominio",
+        "energia",
+        "agua",
+        "internet",
+        "telefone",
+        "tv_assinatura",
+        "ipva_iptu",
+        "seguros",
+        "supermercado",
+        "padaria",
+        "acougue",
+        "hortifruti",
+        "feira",
+        "restaurantes",
+        "lanches",
+        "delivery",
+        "combustivel",
+        "manutencao_veiculo",
+        "estacionamento",
+        "pedagio",
+        "transporte_publico",
+        "uber_99",
+        "seguro_carro",
+        "documentacao_veiculo",
+        "plano_saude",
+        "farmacia",
+        "consultas",
+        "exames",
+        "odontologia",
+        "academia",
+        "roupas",
+        "calcados",
+        "acessorios",
+        "cosmeticos",
+        "eletronicos",
+        "presentes",
+        "limpeza",
+        "utensilios",
+        "reparos",
+        "moveis",
+        "eletrodomesticos",
+        "cursos",
+        "livros",
+        "material_didatico",
+        "assinaturas_educacao",
+        "streaming",
+        "softwares",
+        "nuvem",
+        "dominios",
+        "cartao_credito",
+        "emprestimos",
+        "juros_multas",
+        "taxas_bancarias",
+        "poupanca",
+        "acoes",
+        "tesouro",
+        "criptomoedas",
+        "previdencia",
+        "viagens",
+        "cinema_teatro",
+        "festas",
+        "passeios",
+        "jogos",
+        "escola",
+        "roupas_infantis",
+        "brinquedos",
+        "mesada",
+        "baba",
+        "racao",
+        "veterinario",
+        "banho_tosa",
+        "pets_acessorios",
+        "doacoes",
+        "ajuda_familiar",
+        "escritorio",
+        "equipamentos",
+        "hospedagem_site",
+        "marketing",
+        "terceirizados",
+        "consultorias",
+        "impostos",
+        "salario",
+        "freelance",
+        "vendas",
         "outros"
       ],
       "description": "Categoria da transa\u00e7\u00e3o"
@@ -33,7 +111,8 @@
       "type": "string",
       "enum": [
         "receita",
-        "despesa"
+        "despesa",
+        "investimento"
       ],
       "description": "Tipo de transa\u00e7\u00e3o"
     },
@@ -44,7 +123,8 @@
         "cartao_credito",
         "cartao_debito",
         "pix",
-        "transferencia"
+        "transferencia",
+        "boleto"
       ],
       "description": "Forma de pagamento"
     },
@@ -62,6 +142,37 @@
       "type": "boolean",
       "default": false,
       "description": "Se \u00e9 uma despesa fixa recorrente"
+    },
+    "is_installment": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 uma transa\u00e7\u00e3o parcelada"
+    },
+    "installment_number": {
+      "type": "number",
+      "description": "N\u00famero da parcela (ex: 1 de 12)"
+    },
+    "total_installments": {
+      "type": "number",
+      "description": "Total de parcelas"
+    },
+    "parent_transaction_id": {
+      "type": "string",
+      "description": "ID da transa\u00e7\u00e3o pai (para parcelas)"
+    },
+    "has_interest": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se possui juros"
+    },
+    "interest_rate": {
+      "type": "number",
+      "description": "Taxa de juros mensal (%)"
+    },
+    "due_alert": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se deve exibir alerta de vencimento"
     }
   },
   "required": [
