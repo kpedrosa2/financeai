@@ -59,37 +59,51 @@ export default function AIAnalysis() {
         .filter(d => d.status === 'ativa')
         .reduce((sum, d) => sum + d.current_amount, 0);
 
+      const categoryExpenses = monthTransactions
+        .filter(t => t.type === 'despesa')
+        .reduce((acc, t) => {
+          acc[t.category] = (acc[t.category] || 0) + t.amount;
+          return acc;
+        }, {});
+
+      const topCategories = Object.entries(categoryExpenses)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([cat, val]) => `- ${cat}: R$ ${val.toFixed(2)}`)
+        .join('\n');
+
       const prompt = `
-Faça uma análise financeira completa e detalhada:
+Faça uma análise financeira completa e detalhada em português brasileiro:
 
 DADOS ATUAIS:
 - Salário líquido: R$ ${user?.net_salary || 10000}
 - Receitas do mês: R$ ${monthlyIncome.toFixed(2)}
 - Despesas do mês: R$ ${monthlyExpenses.toFixed(2)}
+- Saldo disponível: R$ ${(monthlyIncome - monthlyExpenses).toFixed(2)}
 - Total de dívidas: R$ ${totalDebt.toFixed(2)}
 - Número de metas: ${goals.length}
 
-CATEGORIAS DE GASTOS:
-${Object.entries(
-  monthTransactions
-    .filter(t => t.type === 'despesa')
-    .reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + t.amount;
-      return acc;
-    }, {})
-)
-  .sort((a, b) => b[1] - a[1])
-  .map(([cat, val]) => `- ${cat}: R$ ${val.toFixed(2)}`)
-  .join('\n')}
+PRINCIPAIS CATEGORIAS DE GASTOS:
+${topCategories || 'Nenhum gasto registrado'}
 
-Forneça uma análise completa com:
-1. Avaliação da saúde financeira atual
-2. Projeção de saldo para os próximos 6 meses
-3. Recomendações de economia
-4. Estratégia para quitação de dívidas
-5. Plano para alcançar metas financeiras
-6. Oportunidades de investimento
+Forneça uma análise completa e objetiva com:
+
+1. SAÚDE FINANCEIRA ATUAL: Avalie a situação financeira atual em 2-3 frases diretas.
+
+2. PROJEÇÃO FUTURA: Faça uma projeção realista do saldo para os próximos 6 meses considerando o padrão atual de gastos.
+
+3. RECOMENDAÇÕES DE ECONOMIA: Dê 3 sugestões práticas e específicas de como economizar baseado nos gastos apresentados.
+
+4. ESTRATÉGIA PARA DÍVIDAS: ${totalDebt > 0 ? 'Sugira uma estratégia clara para quitar as dívidas mais rapidamente' : 'Explique como evitar dívidas no futuro'}.
+
+5. PLANO PARA METAS: ${goals.length > 0 ? 'Sugira como atingir as metas financeiras mais rapidamente' : 'Sugira metas financeiras que a pessoa deveria ter'}.
+
+6. OPORTUNIDADES DE INVESTIMENTO: Recomende tipos de investimentos adequados para o perfil e momento financeiro atual.
+
+Seja direto, prático e motivacional.
 `;
+
+      console.log('Enviando prompt para IA:', prompt);
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -106,9 +120,11 @@ Forneça uma análise completa com:
         }
       });
 
+      console.log('Resposta da IA:', result);
       setAnalysis(result);
     } catch (error) {
       console.error("Erro ao gerar análise:", error);
+      alert('Erro ao gerar análise. Por favor, tente novamente.');
     }
     setLoading(false);
   };
@@ -153,13 +169,15 @@ Forneça uma análise completa com:
 
       {loading && (
         <div className="grid lg:grid-cols-2 gap-6">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="bg-white/5 backdrop-blur-xl border-white/10">
               <CardHeader>
                 <Skeleton className="h-6 w-48 bg-white/10" />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-32 bg-white/10" />
+                <Skeleton className="h-32 bg-white/10 mb-2" />
+                <Skeleton className="h-4 w-full bg-white/10 mb-2" />
+                <Skeleton className="h-4 w-3/4 bg-white/10" />
               </CardContent>
             </Card>
           ))}
@@ -181,7 +199,7 @@ Forneça uma análise completa com:
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white leading-relaxed">{analysis.financial_health}</p>
+                <p className="text-white leading-relaxed whitespace-pre-line">{analysis.financial_health}</p>
               </CardContent>
             </Card>
 
@@ -193,7 +211,7 @@ Forneça uma análise completa com:
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white leading-relaxed">{analysis.future_projection}</p>
+                <p className="text-white leading-relaxed whitespace-pre-line">{analysis.future_projection}</p>
               </CardContent>
             </Card>
 
@@ -205,7 +223,7 @@ Forneça uma análise completa com:
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white leading-relaxed">{analysis.savings_recommendations}</p>
+                <p className="text-white leading-relaxed whitespace-pre-line">{analysis.savings_recommendations}</p>
               </CardContent>
             </Card>
 
@@ -217,7 +235,7 @@ Forneça uma análise completa com:
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white leading-relaxed">{analysis.debt_strategy}</p>
+                <p className="text-white leading-relaxed whitespace-pre-line">{analysis.debt_strategy}</p>
               </CardContent>
             </Card>
 
@@ -228,7 +246,7 @@ Forneça uma análise completa com:
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white leading-relaxed">{analysis.goal_plan}</p>
+                <p className="text-white leading-relaxed whitespace-pre-line">{analysis.goal_plan}</p>
               </CardContent>
             </Card>
 
@@ -239,7 +257,7 @@ Forneça uma análise completa com:
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white leading-relaxed">{analysis.investment_opportunities}</p>
+                <p className="text-white leading-relaxed whitespace-pre-line">{analysis.investment_opportunities}</p>
               </CardContent>
             </Card>
           </div>
