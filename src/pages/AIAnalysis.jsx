@@ -6,12 +6,14 @@ import { Sparkles, TrendingUp, AlertTriangle, Lightbulb, Download } from "lucide
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import SavingsSimulator from "../components/analysis/SavingsSimulator";
 
 export default function AIAnalysis() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
 
   React.useEffect(() => {
@@ -38,6 +40,8 @@ export default function AIAnalysis() {
 
   const generateAnalysis = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
@@ -70,43 +74,36 @@ export default function AIAnalysis() {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
         .map(([cat, val]) => `- ${cat}: R$ ${val.toFixed(2)}`)
-        .join('\n');
+        .join('\n') || '- Nenhum gasto registrado';
 
-      const prompt = `
-Faça uma análise financeira completa e detalhada em português brasileiro:
+      const prompt = `Analise esta situação financeira e forneça insights em português:
 
-DADOS ATUAIS:
+DADOS:
 - Salário líquido: R$ ${user?.net_salary || 10000}
 - Receitas do mês: R$ ${monthlyIncome.toFixed(2)}
 - Despesas do mês: R$ ${monthlyExpenses.toFixed(2)}
-- Saldo disponível: R$ ${(monthlyIncome - monthlyExpenses).toFixed(2)}
-- Total de dívidas: R$ ${totalDebt.toFixed(2)}
-- Número de metas: ${goals.length}
+- Saldo: R$ ${(monthlyIncome - monthlyExpenses).toFixed(2)}
+- Dívidas: R$ ${totalDebt.toFixed(2)}
+- Metas: ${goals.length}
 
-PRINCIPAIS CATEGORIAS DE GASTOS:
-${topCategories || 'Nenhum gasto registrado'}
+GASTOS POR CATEGORIA:
+${topCategories}
 
-Forneça uma análise completa e objetiva com:
+Forneça análise com:
+1. Saúde financeira atual (2-3 frases)
+2. Projeção para próximos 6 meses
+3. 3 recomendações de economia
+4. Estratégia para ${totalDebt > 0 ? 'quitar dívidas' : 'evitar dívidas'}
+5. Plano para ${goals.length > 0 ? 'atingir metas' : 'criar metas'}
+6. Oportunidades de investimento
 
-1. SAÚDE FINANCEIRA ATUAL: Avalie a situação financeira atual em 2-3 frases diretas.
+Seja direto e prático.`;
 
-2. PROJEÇÃO FUTURA: Faça uma projeção realista do saldo para os próximos 6 meses considerando o padrão atual de gastos.
-
-3. RECOMENDAÇÕES DE ECONOMIA: Dê 3 sugestões práticas e específicas de como economizar baseado nos gastos apresentados.
-
-4. ESTRATÉGIA PARA DÍVIDAS: ${totalDebt > 0 ? 'Sugira uma estratégia clara para quitar as dívidas mais rapidamente' : 'Explique como evitar dívidas no futuro'}.
-
-5. PLANO PARA METAS: ${goals.length > 0 ? 'Sugira como atingir as metas financeiras mais rapidamente' : 'Sugira metas financeiras que a pessoa deveria ter'}.
-
-6. OPORTUNIDADES DE INVESTIMENTO: Recomende tipos de investimentos adequados para o perfil e momento financeiro atual.
-
-Seja direto, prático e motivacional.
-`;
-
-      console.log('Enviando prompt para IA:', prompt);
+      console.log('=== ENVIANDO PARA IA ===');
+      console.log('Prompt:', prompt);
 
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
+        prompt: prompt,
         response_json_schema: {
           type: "object",
           properties: {
@@ -116,17 +113,29 @@ Seja direto, prático e motivacional.
             debt_strategy: { type: "string" },
             goal_plan: { type: "string" },
             investment_opportunities: { type: "string" }
-          }
+          },
+          required: ["financial_health", "future_projection", "savings_recommendations", "debt_strategy", "goal_plan", "investment_opportunities"]
         }
       });
 
-      console.log('Resposta da IA:', result);
+      console.log('=== RESPOSTA DA IA ===');
+      console.log('Result:', result);
+
+      if (!result || typeof result !== 'object') {
+        throw new Error('Resposta inválida da IA');
+      }
+
       setAnalysis(result);
     } catch (error) {
-      console.error("Erro ao gerar análise:", error);
-      alert('Erro ao gerar análise. Por favor, tente novamente.');
+      console.error('=== ERRO COMPLETO ===');
+      console.error('Erro:', error);
+      console.error('Message:', error.message);
+      console.error('Stack:', error.stack);
+      
+      setError(error.message || 'Erro desconhecido ao gerar análise');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -154,7 +163,18 @@ Seja direto, prático e motivacional.
         </div>
       </motion.div>
 
-      {!analysis && !loading && (
+      {error && (
+        <Alert className="bg-rose-500/20 border-rose-500/50">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="text-white">
+            <strong>Erro:</strong> {error}
+            <br />
+            <span className="text-sm text-rose-200">Abra o Console (F12) para mais detalhes</span>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!analysis && !loading && !error && (
         <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/30 p-12">
           <div className="text-center space-y-4">
             <Sparkles className="w-16 h-16 mx-auto text-purple-400" />
