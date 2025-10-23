@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import DebtForm from "../components/debts/DebtForm";
 import DebtList from "../components/debts/DebtList";
 import DebtSimulator from "../components/debts/DebtSimulator";
 import DebtStrategy from "../components/debts/DebtStrategy";
+import { formatCurrency } from "@/utils/formatters";
 
 export default function Debts() {
   const [showForm, setShowForm] = useState(false);
@@ -103,15 +105,15 @@ export default function Debts() {
       <div className="grid md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl border-orange-500/30 p-6">
           <p className="text-sm text-orange-300 mb-2">Dívida Total</p>
-          <p className="text-3xl font-bold text-white">R$ {totalDebt.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalDebt)}</p>
           <p className="text-xs text-orange-200 mt-2">{activeDebts.length} dívidas ativas</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-rose-500/20 to-pink-500/20 backdrop-blur-xl border-rose-500/30 p-6">
           <p className="text-sm text-rose-300 mb-2">Valor Original</p>
-          <p className="text-3xl font-bold text-white">R$ {totalOriginal.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalOriginal)}</p>
           <p className="text-xs text-rose-200 mt-2">
-            {totalDebt > totalOriginal ? '+' : ''} R$ {Math.abs(totalDebt - totalOriginal).toFixed(2)} em juros
+            {totalDebt > totalOriginal ? '+' : ''} {formatCurrency(Math.abs(totalDebt - totalOriginal))} em juros
           </p>
         </Card>
 

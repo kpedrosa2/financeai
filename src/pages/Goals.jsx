@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import GoalForm from "../components/goals/GoalForm";
 import GoalCard from "../components/goals/GoalCard";
 import GoalProgress from "../components/goals/GoalProgress";
+import { formatCurrency } from "@/utils/formatters";
 
 export default function Goals() {
   const [showForm, setShowForm] = useState(false);
@@ -109,12 +111,12 @@ export default function Goals() {
       <div className="grid md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/30 p-6">
           <p className="text-sm text-purple-300 mb-2">Meta Total</p>
-          <p className="text-3xl font-bold text-white">R$ {totalTarget.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalTarget)}</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl border-emerald-500/30 p-6">
           <p className="text-sm text-emerald-300 mb-2">Total Economizado</p>
-          <p className="text-3xl font-bold text-white">R$ {totalSaved.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalSaved)}</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/30 p-6">

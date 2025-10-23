@@ -6,6 +6,7 @@ import { Plus, Filter, Download, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatCurrency } from "@/utils/formatters";
 
 import TransactionForm from "../components/transactions/TransactionForm";
 import TransactionList from "../components/transactions/TransactionList";
@@ -38,6 +39,12 @@ export default function Transactions() {
     initialData: [],
   });
 
+  const { data: debts = [], isLoading: loadingDebts } = useQuery({
+    queryKey: ['debts'],
+    queryFn: () => base44.entities.Debt.list(),
+    initialData: [],
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Transaction.create(data),
     onSuccess: () => {
@@ -62,6 +69,49 @@ export default function Transactions() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
+
+  // Gerar transações automáticas das dívidas ativas
+  React.useEffect(() => {
+    const generateDebtTransactions = async () => {
+      const activeDebts = debts.filter(d => d.status === 'ativa');
+      
+      for (const debt of activeDebts) {
+        const monthlyPayment = debt.current_amount / (debt.installments - (debt.installments_paid || 0));
+        const dueDate = new Date(debt.due_date);
+        
+        // Verificar se já existe transação para esta dívida este mês
+        const existingTransaction = transactions.find(t => 
+          t.description?.includes(debt.bank_name) && 
+          new Date(t.date).getMonth() === dueDate.getMonth() &&
+          new Date(t.date).getFullYear() === dueDate.getFullYear()
+        );
+
+        if (!existingTransaction && debt.installments_paid < debt.installments) {
+          await base44.entities.Transaction.create({
+            description: `Parcela ${(debt.installments_paid || 0) + 1}/${debt.installments} - ${debt.bank_name}`,
+            amount: monthlyPayment,
+            date: debt.due_date,
+            category: 'emprestimos',
+            type: 'despesa',
+            payment_method: 'transferencia',
+            status: 'pendente',
+            is_installment: true,
+            installment_number: (debt.installments_paid || 0) + 1,
+            total_installments: debt.installments,
+            parent_transaction_id: `debt_${debt.id}`,
+            has_interest: true,
+            interest_rate: debt.interest_rate
+          });
+        }
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    };
+
+    if (debts.length > 0 && transactions.length > 0) {
+      generateDebtTransactions();
+    }
+  }, [debts]);
 
   const handleSubmit = async (data) => {
     // Se for transação recorrente, criar para todos os meses restantes do ano
@@ -213,24 +263,24 @@ export default function Transactions() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl border-emerald-500/30 p-6">
           <p className="text-sm text-emerald-300 mb-2">Receitas</p>
-          <p className="text-3xl font-bold text-white">R$ {totalIncome.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalIncome)}</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-rose-500/20 to-pink-500/20 backdrop-blur-xl border-rose-500/30 p-6">
           <p className="text-sm text-rose-300 mb-2">Despesas</p>
-          <p className="text-3xl font-bold text-white">R$ {totalExpenses.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalExpenses)}</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/30 p-6">
           <p className="text-sm text-purple-300 mb-2">Saldo</p>
           <p className={`text-3xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-            R$ {(totalIncome - totalExpenses).toFixed(2)}
+            {formatCurrency(totalIncome - totalExpenses)}
           </p>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/30 p-6">
           <p className="text-sm text-blue-300 mb-2">Investido</p>
-          <p className="text-3xl font-bold text-white">R$ {totalInvested.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalInvested)}</p>
         </Card>
       </div>
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { formatCurrency } from "@/utils/formatters";
 
 import StatsCard from "../components/dashboard/StatsCard";
 import SpendingChart from "../components/dashboard/SpendingChart";
@@ -138,7 +140,7 @@ Forneça 4 insights curtos e acionáveis sobre:
     if (transactions.length > 0 && !aiInsights) {
       generateAIInsights();
     }
-  }, [transactions]);
+  }, [transactions, aiInsights]); // Added aiInsights to dependencies to prevent redundant calls if already present.
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -191,7 +193,7 @@ Forneça 4 insights curtos e acionáveis sobre:
         <motion.div variants={itemVariants}>
           <StatsCard
             title="Saldo Disponível"
-            value={`R$ ${balance.toFixed(2)}`}
+            value={formatCurrency(balance)}
             icon={DollarSign}
             trend={balance > 0 ? "positive" : "negative"}
             trendValue={`${((balance / (user?.net_salary || 10000)) * 100).toFixed(1)}%`}
@@ -202,7 +204,7 @@ Forneça 4 insights curtos e acionáveis sobre:
         <motion.div variants={itemVariants}>
           <StatsCard
             title="Despesas do Mês"
-            value={`R$ ${monthlyExpenses.toFixed(2)}`}
+            value={formatCurrency(monthlyExpenses)}
             icon={TrendingDown}
             trend="neutral"
             trendValue={`${monthTransactions.filter(t => t.type === 'despesa').length} transações`}
@@ -213,7 +215,7 @@ Forneça 4 insights curtos e acionáveis sobre:
         <motion.div variants={itemVariants}>
           <StatsCard
             title="Dívidas Ativas"
-            value={`R$ ${totalDebt.toFixed(2)}`}
+            value={formatCurrency(totalDebt)}
             icon={CreditCard}
             trend="negative"
             trendValue={`${debts.filter(d => d.status === 'ativa').length} dívidas`}

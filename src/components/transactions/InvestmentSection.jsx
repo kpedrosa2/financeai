@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ import { Plus, TrendingUp, Calendar, DollarSign, Pencil, Trash2 } from "lucide-r
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatCurrency } from "@/utils/formatters"; // Added import
 
 export default function InvestmentSection({ investments, isLoading }) {
   const [showForm, setShowForm] = useState(false);
@@ -111,18 +113,18 @@ export default function InvestmentSection({ investments, isLoading }) {
       <div className="grid md:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/30 p-6">
           <p className="text-sm text-blue-300 mb-2">Total Investido</p>
-          <p className="text-3xl font-bold text-white">R$ {totalInvested.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalInvested)}</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl border-emerald-500/30 p-6">
           <p className="text-sm text-emerald-300 mb-2">Valor Atual</p>
-          <p className="text-3xl font-bold text-white">R$ {totalCurrent.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalCurrent)}</p>
         </Card>
 
         <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-purple-500/30 p-6">
           <p className="text-sm text-purple-300 mb-2">Rentabilidade</p>
           <p className="text-3xl font-bold text-emerald-400">
-            +R$ {totalReturn.toFixed(2)}
+            {totalReturn > 0 ? '+' : ''}{formatCurrency(totalReturn)}
           </p>
         </Card>
 
@@ -290,7 +292,7 @@ export default function InvestmentSection({ investments, isLoading }) {
                     borderRadius: '8px',
                     color: 'white'
                   }}
-                  formatter={(value) => `R$ ${value.toFixed(2)}`}
+                  formatter={(value) => formatCurrency(value)}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="investido" stroke="#3b82f6" name="Investido" strokeWidth={2} />
@@ -306,7 +308,7 @@ export default function InvestmentSection({ investments, isLoading }) {
         {investments.map((investment) => {
           const daysInvested = differenceInDays(new Date(), new Date(investment.application_date));
           const returnAmount = investment.current_amount - investment.initial_amount;
-          const returnPercent = (returnAmount / investment.initial_amount) * 100;
+          const returnPercent = (investment.initial_amount !== 0) ? (returnAmount / investment.initial_amount) * 100 : 0;
 
           return (
             <motion.div
@@ -335,11 +337,11 @@ export default function InvestmentSection({ investments, isLoading }) {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-xs text-blue-300">Investido</p>
-                      <p className="text-lg font-bold text-white">R$ {investment.initial_amount.toFixed(2)}</p>
+                      <p className="text-lg font-bold text-white">{formatCurrency(investment.initial_amount)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-blue-300">Atual</p>
-                      <p className="text-lg font-bold text-emerald-400">R$ {investment.current_amount.toFixed(2)}</p>
+                      <p className="text-lg font-bold text-emerald-400">{formatCurrency(investment.current_amount)}</p>
                     </div>
                   </div>
 
@@ -367,7 +369,7 @@ export default function InvestmentSection({ investments, isLoading }) {
                   {investment.monthly_contribution > 0 && (
                     <div className="text-xs text-blue-300 flex items-center gap-1">
                       <DollarSign className="w-3 h-3" />
-                      Aporte: R$ {investment.monthly_contribution.toFixed(2)}/mês
+                      Aporte: {formatCurrency(investment.monthly_contribution)}/mês
                     </div>
                   )}
                 </CardContent>

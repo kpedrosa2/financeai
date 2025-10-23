@@ -7,6 +7,7 @@ import { Pencil, Trash2, Check, AlertTriangle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/utils/formatters";
 
 const categoryLabels = {
   aluguel_financiamento: "Aluguel",
@@ -46,6 +47,8 @@ const categoryLabels = {
   cosmeticos: "Cosméticos",
   eletronicos: "Eletrônicos",
   presentes: "Presentes",
+  emprestimos: "Empréstimos",
+  cartao_credito: "Cartão",
   salario: "Salário",
   freelance: "Freelance",
   vendas: "Vendas",
@@ -143,7 +146,7 @@ export default function TransactionList({ transactions, isLoading, onEdit, onDel
                         </Badge>
                       </TableCell>
                       <TableCell className={`font-bold ${transaction.type === 'receita' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {transaction.type === 'receita' ? '+' : '-'} R$ {transaction.amount.toFixed(2)}
+                        {transaction.type === 'receita' ? '+' : '-'} {formatCurrency(transaction.amount)}
                       </TableCell>
                       <TableCell>
                         <Badge
