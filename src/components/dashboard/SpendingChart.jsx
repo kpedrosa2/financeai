@@ -1,8 +1,7 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { formatCurrency } from "@/utils/formatters"; // Corrected import path
+import { formatCurrency } from "../utils/formatters";
 
 const categoryColors = {
   alimentacao: "#10b981",
@@ -58,7 +57,7 @@ export default function SpendingChart({ transactions }) {
                 borderRadius: '8px',
                 color: 'white'
               }}
-              formatter={(value) => [formatCurrency(value), 'Gasto']} {/* Using formatCurrency */}
+              formatter={(value) => [formatCurrency(value), 'Gasto']}
             />
             <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
               {data.map((entry, index) => (

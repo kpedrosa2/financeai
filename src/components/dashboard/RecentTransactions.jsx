@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "@/utils/formatters"; // Corrected import path
+import { formatCurrency } from "../utils/formatters";
 
 const categoryIcons = {
   alimentacao: "🍽️",

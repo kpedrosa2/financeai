@@ -1,11 +1,9 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { formatCurrency } from "../utils/formatters";
 
 export default function MonthlyOverview({ transactions, netSalary }) {
-  // Agrupar por mês nos últimos 6 meses
   const last6Months = Array.from({ length: 6 }, (_, i) => {
     const date = new Date();
     date.setMonth(date.getMonth() - (5 - i));
@@ -63,7 +61,7 @@ export default function MonthlyOverview({ transactions, netSalary }) {
                 borderRadius: '8px',
                 color: 'white'
               }}
-              formatter={(value) => `R$ ${value.toFixed(2)}`}
+              formatter={(value) => formatCurrency(value)}
             />
             <Legend 
               wrapperStyle={{ color: 'rgba(255,255,255,0.7)' }}

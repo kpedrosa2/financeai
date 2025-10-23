@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency } from "../lib/formatters"; // Corrected import path
+import { formatCurrency } from "../utils/formatters";
 
 export default function DebtStrategy({ debts }) {
   const [strategy, setStrategy] = useState(null);
@@ -18,7 +17,7 @@ export default function DebtStrategy({ debts }) {
 Analise estas dívidas e crie uma estratégia de quitação:
 
 ${debts.map(d => `
-- ${d.bank_name}: R$ ${formatCurrency(d.current_amount)} (${d.interest_rate}% juros)
+- ${d.bank_name}: ${formatCurrency(d.current_amount)} (${d.interest_rate}% juros)
   Parcelas: ${d.installments_paid}/${d.installments}
 `).join('\n')}
 
