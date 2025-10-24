@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,6 +8,95 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "../utils/formatters";
+
+const categoryIcons = {
+  aluguel_financiamento: "🏠",
+  condominio: "🏢",
+  energia: "⚡",
+  agua: "💧",
+  internet: "🌐",
+  telefone: "📱",
+  tv_assinatura: "📺",
+  ipva_iptu: "🚗",
+  seguros: "🛡️",
+  supermercado: "🛒",
+  padaria: "🥖",
+  acougue: "🥩",
+  hortifruti: "🥬",
+  feira: "🍎",
+  restaurantes: "🍽️",
+  lanches: "🍔",
+  delivery: "🛵",
+  combustivel: "⛽",
+  manutencao_veiculo: "🔧",
+  estacionamento: "🅿️",
+  pedagio: "🛣️",
+  transporte_publico: "🚌",
+  uber_99: "🚕",
+  seguro_carro: "🚗",
+  documentacao_veiculo: "📄",
+  plano_saude: "🏥",
+  farmacia: "💊",
+  consultas: "👨‍⚕️",
+  exames: "🔬",
+  odontologia: "🦷",
+  academia: "💪",
+  roupas: "👕",
+  calcados: "👟",
+  acessorios: "👜",
+  cosmeticos: "💄",
+  eletronicos: "📱",
+  presentes: "🎁",
+  limpeza: "🧹",
+  utensilios: "🍴",
+  reparos: "🔨",
+  moveis: "🛋️",
+  eletrodomesticos: "🔌",
+  cursos: "📚",
+  livros: "📖",
+  material_didatico: "✏️",
+  assinaturas_educacao: "🎓",
+  streaming: "🎬",
+  softwares: "💻",
+  nuvem: "☁️",
+  dominios: "🌐",
+  cartao_credito: "💳",
+  emprestimos: "💰",
+  juros_multas: "⚠️",
+  taxas_bancarias: "🏦",
+  poupanca: "🐷",
+  acoes: "📈",
+  tesouro: "🏛️",
+  criptomoedas: "₿",
+  previdencia: "👴",
+  viagens: "✈️",
+  cinema_teatro: "🎭",
+  festas: "🎉",
+  passeios: "🎡",
+  jogos: "🎮",
+  escola: "🏫",
+  roupas_infantis: "👶",
+  brinquedos: "🧸",
+  mesada: "💵",
+  baba: "👶",
+  racao: "🐕",
+  veterinario: "🐾",
+  banho_tosa: "🛁",
+  pets_acessorios: "🦴",
+  doacoes: "❤️",
+  ajuda_familiar: "👨‍👩‍👧",
+  escritorio: "🖊️",
+  equipamentos: "⚙️",
+  hospedagem_site: "🌐",
+  marketing: "📣",
+  terceirizados: "👔",
+  consultorias: "💼",
+  impostos: "📊",
+  salario: "💰",
+  freelance: "💻",
+  vendas: "🤝",
+  outros: "📦"
+};
 
 const categoryLabels = {
   aluguel_financiamento: "Aluguel",
@@ -48,8 +136,51 @@ const categoryLabels = {
   cosmeticos: "Cosméticos",
   eletronicos: "Eletrônicos",
   presentes: "Presentes",
-  emprestimos: "Empréstimos",
+  limpeza: "Limpeza",
+  utensilios: "Utensílios",
+  reparos: "Reparos",
+  moveis: "Móveis",
+  eletrodomesticos: "Eletrodomésticos",
+  cursos: "Cursos",
+  livros: "Livros",
+  material_didatico: "Material",
+  assinaturas_educacao: "Assinaturas",
+  streaming: "Streaming",
+  softwares: "Softwares",
+  nuvem: "Nuvem",
+  dominios: "Domínios",
   cartao_credito: "Cartão",
+  emprestimos: "Empréstimos",
+  juros_multas: "Juros/Multas",
+  taxas_bancarias: "Taxas",
+  poupanca: "Poupança",
+  acoes: "Ações",
+  tesouro: "Tesouro",
+  criptomoedas: "Cripto",
+  previdencia: "Previdência",
+  viagens: "Viagens",
+  cinema_teatro: "Cinema",
+  festas: "Festas",
+  passeios: "Passeios",
+  jogos: "Jogos",
+  escola: "Escola",
+  roupas_infantis: "Roupas infantis",
+  brinquedos: "Brinquedos",
+  mesada: "Mesada",
+  baba: "Babá",
+  racao: "Ração",
+  veterinario: "Veterinário",
+  banho_tosa: "Banho e tosa",
+  pets_acessorios: "Pet acessórios",
+  doacoes: "Doações",
+  ajuda_familiar: "Ajuda familiar",
+  escritorio: "Escritório",
+  equipamentos: "Equipamentos",
+  hospedagem_site: "Hospedagem",
+  marketing: "Marketing",
+  terceirizados: "Terceirizados",
+  consultorias: "Consultorias",
+  impostos: "Impostos",
   salario: "Salário",
   freelance: "Freelance",
   vendas: "Vendas",
@@ -121,24 +252,27 @@ export default function TransactionList({ transactions, isLoading, onEdit, onDel
                         {format(new Date(transaction.date), "dd/MM/yyyy", { locale: ptBR })}
                       </TableCell>
                       <TableCell className="text-white">
-                        <div className="flex flex-col gap-1">
-                          <span>{transaction.description}</span>
-                          {transaction.is_recurring && (
-                            <Badge variant="outline" className="w-fit text-xs bg-blue-500/20 text-blue-400 border-blue-500/30">
-                              🔄 Recorrente
-                            </Badge>
-                          )}
-                          {transaction.is_installment && (
-                            <Badge variant="outline" className="w-fit text-xs bg-purple-500/20 text-purple-400 border-purple-500/30">
-                              📋 {transaction.installment_number}/{transaction.total_installments}
-                            </Badge>
-                          )}
-                          {alert && (
-                            <div className={`flex items-center gap-1 text-xs ${alert.color} font-semibold`}>
-                              <alert.icon className="w-3 h-3" />
-                              {alert.text}
-                            </div>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{categoryIcons[transaction.category] || "📦"}</span>
+                          <div className="flex flex-col gap-1">
+                            <span>{transaction.description}</span>
+                            {transaction.is_recurring && (
+                              <Badge variant="outline" className="w-fit text-xs bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                🔄 Recorrente
+                              </Badge>
+                            )}
+                            {transaction.is_installment && (
+                              <Badge variant="outline" className="w-fit text-xs bg-purple-500/20 text-purple-400 border-purple-500/30">
+                                📋 {transaction.installment_number}/{transaction.total_installments}
+                              </Badge>
+                            )}
+                            {alert && (
+                              <div className={`flex items-center gap-1 text-xs ${alert.color} font-semibold`}>
+                                <alert.icon className="w-3 h-3" />
+                                {alert.text}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
