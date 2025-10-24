@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Filter, Download, TrendingUp } from "lucide-react";
+import { Plus, Filter, Download, TrendingUp, Upload } from "lucide-react"; // Added Upload icon
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,9 +13,11 @@ import TransactionForm from "../components/transactions/TransactionForm";
 import TransactionList from "../components/transactions/TransactionList";
 import TransactionFilters from "../components/transactions/TransactionFilters";
 import InvestmentSection from "../components/transactions/InvestmentSection";
+import ImportTransactions from "../components/transactions/ImportTransactions"; // Assuming this component exists
 
 export default function Transactions() {
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false); // New state for import modal
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [activeTab, setActiveTab] = useState("transactions");
   const [filters, setFilters] = useState({
@@ -250,16 +253,26 @@ export default function Transactions() {
             Controle completo de receitas, despesas e investimentos
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingTransaction(null);
-            setShowForm(true);
-          }}
-          className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/50"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Transação
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowImport(true)}
+            variant="outline"
+            className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Extrato
+          </Button>
+          <Button
+            onClick={() => {
+              setEditingTransaction(null);
+              setShowForm(true);
+            }}
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/50"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Transação
+          </Button>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -299,6 +312,18 @@ export default function Transactions() {
 
         <TabsContent value="transactions" className="space-y-6 mt-6">
           <TransactionFilters filters={filters} onFilterChange={setFilters} />
+
+          <AnimatePresence>
+            {showImport && (
+              <ImportTransactions
+                onImportComplete={() => {
+                  setShowImport(false);
+                  queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                }}
+                onCancel={() => setShowImport(false)}
+              />
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {showForm && (
