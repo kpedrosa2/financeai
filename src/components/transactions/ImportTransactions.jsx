@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, CheckCircle, AlertCircle, X, Loader2, Sparkles } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, X, Loader2, Sparkles, CreditCard } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
@@ -12,6 +12,7 @@ import { formatCurrency } from "../utils/formatters";
 
 export default function ImportTransactions({ onImportComplete, onCancel }) {
   const [file, setFile] = useState(null);
+  const [closingDay, setClosingDay] = useState(10); // Dia de fechamento da fatura
   const [uploading, setUploading] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [categorizing, setCategorizing] = useState(false);
@@ -35,6 +36,24 @@ export default function ImportTransactions({ onImportComplete, onCancel }) {
         setFile(null);
       }
     }
+  };
+
+  // Função para ajustar data do cartão de crédito
+  const adjustCreditCardDate = (transactionDate, closingDay) => {
+    const date = new Date(transactionDate);
+    const day = date.getDate();
+    
+    // Se a compra foi feita após o dia de fechamento, vai para o próximo mês
+    if (day > closingDay) {
+      date.setMonth(date.getMonth() + 2); // +2 porque: próximo ciclo + mês de vencimento
+    } else {
+      date.setMonth(date.getMonth() + 1); // +1 para o mês de vencimento
+    }
+    
+    // Define para o dia 10 do mês de vencimento (dia típico de vencimento)
+    date.setDate(closingDay + 5);
+    
+    return date.toISOString().split('T')[0];
   };
 
   const handleUpload = async () => {
@@ -114,8 +133,9 @@ Regras:
 1. Se amount for positivo ou description indicar entrada de dinheiro, type = "receita"
 2. Se amount for negativo ou description indicar saída, type = "despesa"
 3. Adicione um campo "category" com a categoria mais adequada
-4. Adicione "payment_method" (pix, cartao_credito, cartao_debito, etc)
+4. Adicione "payment_method" - MUITO IMPORTANTE: se a descrição indicar compra com cartão, use "cartao_credito", senão use "pix", "cartao_debito", "transferencia", etc
 5. Normalize as datas para formato YYYY-MM-DD
+6. Identifique se é pagamento via cartão de crédito pela descrição
 
 Retorne APENAS o array de transações categorizadas.
 `;
@@ -145,8 +165,21 @@ Retorne APENAS o array de transações categorizadas.
 
       console.log('✅ Transações categorizadas:', categorizedResult);
 
+      // Ajustar datas das transações de cartão de crédito
+      const adjustedTransactions = (categorizedResult.transactions || transactions).map(t => {
+        if (t.payment_method === 'cartao_credito' && t.type === 'despesa') {
+          return {
+            ...t,
+            original_date: t.date,
+            date: adjustCreditCardDate(t.date, closingDay),
+            adjusted_for_billing: true
+          };
+        }
+        return t;
+      });
+
       setCategorizing(false);
-      setExtractedData(categorizedResult.transactions || transactions);
+      setExtractedData(adjustedTransactions);
       setStep(2);
 
     } catch (err) {
@@ -163,13 +196,13 @@ Retorne APENAS o array de transações categorizadas.
     try {
       // Importar todas as transações
       const transactionsToImport = extractedData.map(t => ({
-        description: t.description,
+        description: t.description + (t.adjusted_for_billing ? ' 💳' : ''),
         amount: Math.abs(t.amount),
         date: t.date,
         type: t.type || (t.amount > 0 ? 'receita' : 'despesa'),
         category: t.category || 'outros',
         payment_method: t.payment_method || 'transferencia',
-        status: 'pago'
+        status: t.payment_method === 'cartao_credito' ? 'pendente' : 'pago'
       }));
 
       await base44.entities.Transaction.bulkCreate(transactionsToImport);
@@ -217,6 +250,31 @@ Retorne APENAS o array de transações categorizadas.
                 </AlertDescription>
               </Alert>
 
+              {/* Campo de fechamento de fatura */}
+              <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <CreditCard className="w-5 h-5 text-orange-400" />
+                  <Label className="text-white font-semibold">Configuração de Cartão de Crédito</Label>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="closingDay" className="text-orange-200 text-sm">
+                    Dia de fechamento da fatura (1-31)
+                  </Label>
+                  <Input
+                    id="closingDay"
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={closingDay}
+                    onChange={(e) => setClosingDay(parseInt(e.target.value) || 10)}
+                    className="bg-white/10 border-white/20 text-white w-24"
+                  />
+                  <p className="text-xs text-orange-300">
+                    💡 Compras com cartão serão ajustadas para o mês de vencimento da fatura
+                  </p>
+                </div>
+              </div>
+
               <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-purple-500/50 transition-all">
                 <Input
                   type="file"
@@ -253,7 +311,7 @@ Retorne APENAS o array de transações categorizadas.
                       <p className="text-white font-medium">
                         {uploading && '📤 Enviando arquivo...'}
                         {extracting && '🔍 Extraindo dados...'}
-                        {categorizing && '🤖 Categorizando com IA...'}
+                        {categorizing && '🤖 Categorizando e ajustando datas de cartão...'}
                       </p>
                       <p className="text-sm text-purple-300">
                         Isso pode levar alguns segundos
@@ -272,6 +330,12 @@ Retorne APENAS o array de transações categorizadas.
                 <CheckCircle className="h-4 w-4 text-emerald-400" />
                 <AlertDescription className="text-emerald-200">
                   <strong>{extractedData.length} transações</strong> encontradas e categorizadas!
+                  <br />
+                  {extractedData.filter(t => t.adjusted_for_billing).length > 0 && (
+                    <span className="text-xs">
+                      💳 {extractedData.filter(t => t.adjusted_for_billing).length} compras de cartão ajustadas para o mês de vencimento
+                    </span>
+                  )}
                 </AlertDescription>
               </Alert>
 
@@ -279,11 +343,28 @@ Retorne APENAS o array de transações categorizadas.
                 {extractedData.map((transaction, index) => (
                   <div
                     key={index}
-                    className="bg-white/5 rounded-lg p-4 border border-white/10 hover:bg-white/10 transition-all"
+                    className={`rounded-lg p-4 border transition-all ${
+                      transaction.adjusted_for_billing 
+                        ? 'bg-orange-500/10 border-orange-500/30 hover:bg-orange-500/20' 
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <p className="text-white font-medium">{transaction.description}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-white font-medium">{transaction.description}</p>
+                          {transaction.adjusted_for_billing && (
+                            <Badge className="bg-orange-500/30 text-orange-300 text-xs">
+                              💳 Fatura ajustada
+                            </Badge>
+                          )}
+                        </div>
+                        {transaction.adjusted_for_billing && (
+                          <p className="text-xs text-orange-300 mt-1">
+                            Compra: {new Date(transaction.original_date).toLocaleDateString('pt-BR')} → 
+                            Vencimento: {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                          </p>
+                        )}
                         <div className="flex gap-2 mt-2">
                           <Badge className="bg-purple-500/20 text-purple-300">
                             {transaction.category || 'outros'}
@@ -295,6 +376,11 @@ Retorne APENAS o array de transações categorizadas.
                           }`}>
                             {transaction.type}
                           </Badge>
+                          {transaction.payment_method === 'cartao_credito' && (
+                            <Badge className="bg-orange-500/20 text-orange-400">
+                              💳 Cartão
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
@@ -303,7 +389,7 @@ Retorne APENAS o array de transações categorizadas.
                         }`}>
                           {formatCurrency(Math.abs(transaction.amount))}
                         </p>
-                        <p className="text-xs text-purple-300">{transaction.date}</p>
+                        <p className="text-xs text-purple-300">{new Date(transaction.date).toLocaleDateString('pt-BR')}</p>
                       </div>
                     </div>
                   </div>
