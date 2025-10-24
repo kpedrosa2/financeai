@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -31,9 +30,18 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [showIncome, setShowIncome] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
+  // Alternar entre Saldo e Receita a cada 3 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowIncome(prev => !prev);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const { data: transactions = [], isLoading: loadingTransactions } = useQuery({
@@ -140,7 +148,7 @@ Forneça 4 insights curtos e acionáveis sobre:
     if (transactions.length > 0 && !aiInsights) {
       generateAIInsights();
     }
-  }, [transactions, aiInsights]); // Added aiInsights to dependencies to prevent redundant calls if already present.
+  }, [transactions, aiInsights]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -192,12 +200,12 @@ Forneça 4 insights curtos e acionáveis sobre:
       >
         <motion.div variants={itemVariants}>
           <StatsCard
-            title="Saldo Disponível"
-            value={formatCurrency(balance)}
-            icon={DollarSign}
-            trend={balance > 0 ? "positive" : "negative"}
-            trendValue={`${((balance / (user?.net_salary || 10000)) * 100).toFixed(1)}%`}
-            gradient="from-emerald-500 to-teal-500"
+            title={showIncome ? "Receitas do Mês" : "Saldo Disponível"}
+            value={formatCurrency(showIncome ? monthlyIncome : balance)}
+            icon={showIncome ? TrendingUp : DollarSign}
+            trend={showIncome ? "positive" : (balance > 0 ? "positive" : "negative")}
+            trendValue={showIncome ? `${monthTransactions.filter(t => t.type === 'receita').length} transações` : `${((balance / (user?.net_salary || 10000)) * 100).toFixed(1)}%`}
+            gradient={showIncome ? "from-emerald-500 to-teal-500" : "from-emerald-500 to-teal-500"}
           />
         </motion.div>
 

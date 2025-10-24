@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -71,50 +70,13 @@ export default function Transactions() {
     },
   });
 
-  // Gerar transações automáticas das dívidas ativas
-  React.useEffect(() => {
-    const generateDebtTransactions = async () => {
-      const activeDebts = debts.filter(d => d.status === 'ativa');
-      
-      for (const debt of activeDebts) {
-        const monthlyPayment = debt.current_amount / (debt.installments - (debt.installments_paid || 0));
-        const dueDate = new Date(debt.due_date);
-        
-        // Verificar se já existe transação para esta dívida este mês
-        const existingTransaction = transactions.find(t => 
-          t.description?.includes(debt.bank_name) && 
-          new Date(t.date).getMonth() === dueDate.getMonth() &&
-          new Date(t.date).getFullYear() === dueDate.getFullYear()
-        );
-
-        if (!existingTransaction && debt.installments_paid < debt.installments) {
-          await base44.entities.Transaction.create({
-            description: `Parcela ${(debt.installments_paid || 0) + 1}/${debt.installments} - ${debt.bank_name}`,
-            amount: monthlyPayment,
-            date: debt.due_date,
-            category: 'emprestimos',
-            type: 'despesa',
-            payment_method: 'transferencia',
-            status: 'pendente',
-            is_installment: true,
-            installment_number: (debt.installments_paid || 0) + 1,
-            total_installments: debt.installments,
-            parent_transaction_id: `debt_${debt.id}`,
-            has_interest: true,
-            interest_rate: debt.interest_rate
-          });
-        }
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    };
-
-    if (debts.length > 0 && transactions.length > 0) {
-      generateDebtTransactions();
-    }
-  }, [debts, transactions]); // Added transactions to dependency array to prevent infinite loop
-
   const handleSubmit = async (data) => {
+    // Se for edição, apenas atualizar a transação específica
+    if (editingTransaction) {
+      updateMutation.mutate({ id: editingTransaction.id, data });
+      return;
+    }
+
     // Se for transação recorrente, criar para todos os meses restantes do ano
     if (data.is_recurring) {
       const currentDate = new Date(data.date);
@@ -161,11 +123,8 @@ export default function Transactions() {
       return;
     }
 
-    if (editingTransaction) {
-      updateMutation.mutate({ id: editingTransaction.id, data });
-    } else {
-      createMutation.mutate(data);
-    }
+    // Transação simples
+    createMutation.mutate(data);
   };
 
   const handleEdit = (transaction) => {
@@ -179,6 +138,49 @@ export default function Transactions() {
     }
   };
 
+  // Gerar transações automáticas das dívidas ativas
+  React.useEffect(() => {
+    const generateDebtTransactions = async () => {
+      const activeDebts = debts.filter(d => d.status === 'ativa');
+      
+      for (const debt of activeDebts) {
+        const monthlyPayment = debt.current_amount / (debt.installments - (debt.installments_paid || 0));
+        const dueDate = new Date(debt.due_date);
+        
+        // Verificar se já existe transação para esta dívida este mês
+        const existingTransaction = transactions.find(t => 
+          t.description?.includes(debt.bank_name) && 
+          new Date(t.date).getMonth() === dueDate.getMonth() &&
+          new Date(t.date).getFullYear() === dueDate.getFullYear()
+        );
+
+        if (!existingTransaction && debt.installments_paid < debt.installments) {
+          await base44.entities.Transaction.create({
+            description: `Parcela ${(debt.installments_paid || 0) + 1}/${debt.installments} - ${debt.bank_name}`,
+            amount: monthlyPayment,
+            date: debt.due_date,
+            category: 'emprestimos',
+            type: 'despesa',
+            payment_method: 'transferencia',
+            status: 'pendente',
+            is_installment: true,
+            installment_number: (debt.installments_paid || 0) + 1,
+            total_installments: debt.installments,
+            parent_transaction_id: `debt_${debt.id}`,
+            has_interest: true,
+            interest_rate: debt.interest_rate
+          });
+        }
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    };
+
+    if (debts.length > 0 && transactions.length >= 0) {
+      generateDebtTransactions();
+    }
+  }, [debts]);
+
   const checkDueAlerts = (transaction) => {
     const today = new Date();
     const dueDate = new Date(transaction.date);
@@ -186,7 +188,6 @@ export default function Transactions() {
 
     if (transaction.status === 'pendente') {
       if (diffDays < 0) {
-        // Atualizar para atrasado e adicionar juros se aplicável
         if (transaction.has_interest && transaction.interest_rate) {
           const monthsOverdue = Math.abs(Math.floor(diffDays / 30));
           const newAmount = transaction.amount * Math.pow(1 + transaction.interest_rate / 100, monthsOverdue);
@@ -211,7 +212,7 @@ export default function Transactions() {
 
   React.useEffect(() => {
     transactions.forEach(checkDueAlerts);
-  }, [transactions, updateMutation]); // Added updateMutation to dependency array
+  }, [transactions]);
 
   const filteredTransactions = transactions.filter(t => {
     const tDate = new Date(t.date);
