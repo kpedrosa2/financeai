@@ -50,6 +50,15 @@ export default function AIAnalysis() {
       return;
     }
 
+    // Confirmar antes de fazer análise (custa créditos)
+    const confirmar = window.confirm(
+      '💰 Esta análise custará aproximadamente $0.001 USD.\n\n' +
+      'Seu saldo no DeepSeek precisa ter créditos.\n\n' +
+      'Deseja continuar?'
+    );
+
+    if (!confirmar) return;
+
     setLoading(true);
     setError(null);
     
@@ -129,7 +138,17 @@ Seja direto, prático e motivacional.`;
 
     } catch (error) {
       console.error('❌ Erro:', error);
-      setError(error.message || 'Erro ao gerar análise');
+      
+      // Mensagem de erro mais clara
+      if (error.message.includes('Insufficient Balance')) {
+        setError(
+          '💳 Saldo insuficiente no DeepSeek!\n\n' +
+          'Adicione créditos em: https://platform.deepseek.com/billing\n' +
+          'Apenas $5 USD dá para centenas de análises!'
+        );
+      } else {
+        setError(error.message || 'Erro ao gerar análise');
+      }
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -95,6 +96,16 @@ export default function DeepSeekConfig() {
             <li>• Análises financeiras precisas</li>
           </ul>
         </div>
+
+        <Alert className="bg-blue-500/20 border-blue-500/50">
+          <AlertDescription className="text-blue-200 text-sm">
+            <strong>💳 Precisa adicionar créditos?</strong>
+            <br />
+            Acesse: <a href="https://platform.deepseek.com/billing" target="_blank" className="underline">platform.deepseek.com/billing</a>
+            <br />
+            <strong>$5 USD = ~5.000 análises!</strong> (muito barato)
+          </AlertDescription>
+        </Alert>
       </CardContent>
     </Card>
   );
