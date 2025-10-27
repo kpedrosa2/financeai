@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -76,63 +77,51 @@ export default function AIAnalysis() {
         .map(([cat, val]) => `- ${cat}: R$ ${val.toFixed(2)}`)
         .join('\n') || '- Nenhum gasto registrado';
 
-      const prompt = `Analise esta situação financeira e forneça insights em português:
+      const prompt = `Analise esta situação financeira e forneça insights em português brasileiro:
 
-DADOS:
-- Salário líquido: R$ ${user?.net_salary || 10000}
+DADOS FINANCEIROS:
+- Salário líquido mensal: R$ ${user?.net_salary || 10000}
 - Receitas do mês: R$ ${monthlyIncome.toFixed(2)}
 - Despesas do mês: R$ ${monthlyExpenses.toFixed(2)}
-- Saldo: R$ ${(monthlyIncome - monthlyExpenses).toFixed(2)}
-- Dívidas: R$ ${totalDebt.toFixed(2)}
-- Metas: ${goals.length}
+- Saldo disponível: R$ ${(monthlyIncome - monthlyExpenses).toFixed(2)}
+- Total de dívidas ativas: R$ ${totalDebt.toFixed(2)}
+- Número de metas: ${goals.length}
 
-GASTOS POR CATEGORIA:
+PRINCIPAIS CATEGORIAS DE GASTOS:
 ${topCategories}
 
-Forneça análise com:
-1. Saúde financeira atual (2-3 frases)
-2. Projeção para próximos 6 meses
-3. 3 recomendações de economia
-4. Estratégia para ${totalDebt > 0 ? 'quitar dívidas' : 'evitar dívidas'}
-5. Plano para ${goals.length > 0 ? 'atingir metas' : 'criar metas'}
-6. Oportunidades de investimento
+Por favor, forneça uma análise completa em formato JSON com os seguintes campos:
 
-Seja direto e prático.`;
+{
+  "financial_health": "Avaliação da saúde financeira atual em 2-3 frases diretas e objetivas",
+  "future_projection": "Projeção realista para os próximos 6 meses baseada no padrão atual",
+  "savings_recommendations": "3 recomendações práticas e específicas de economia baseadas nos gastos",
+  "debt_strategy": "${totalDebt > 0 ? 'Estratégia clara para quitar as dívidas mais rapidamente' : 'Como evitar dívidas no futuro'}",
+  "goal_plan": "${goals.length > 0 ? 'Como atingir as metas financeiras mais rapidamente' : 'Sugestões de metas financeiras'}",
+  "investment_opportunities": "Recomendações de investimentos adequados para o perfil e momento financeiro"
+}
 
-      console.log('=== ENVIANDO PARA IA ===');
-      console.log('Prompt:', prompt);
+Seja direto, prático e motivacional.`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            financial_health: { type: "string" },
-            future_projection: { type: "string" },
-            savings_recommendations: { type: "string" },
-            debt_strategy: { type: "string" },
-            goal_plan: { type: "string" },
-            investment_opportunities: { type: "string" }
-          },
-          required: ["financial_health", "future_projection", "savings_recommendations", "debt_strategy", "goal_plan", "investment_opportunities"]
-        }
+      console.log('🚀 Chamando DeepSeek...');
+
+      // Chamar função backend com DeepSeek
+      const result = await base44.functions.deepseek_analysis({
+        prompt,
+        schema: true
       });
 
-      console.log('=== RESPOSTA DA IA ===');
-      console.log('Result:', result);
+      console.log('✅ Resposta DeepSeek:', result);
 
       if (!result || typeof result !== 'object') {
         throw new Error('Resposta inválida da IA');
       }
 
       setAnalysis(result);
+
     } catch (error) {
-      console.error('=== ERRO COMPLETO ===');
-      console.error('Erro:', error);
-      console.error('Message:', error.message);
-      console.error('Stack:', error.stack);
-      
-      setError(error.message || 'Erro desconhecido ao gerar análise');
+      console.error('❌ Erro:', error);
+      setError(error.message || 'Erro ao gerar análise');
     } finally {
       setLoading(false);
     }
@@ -170,6 +159,16 @@ Seja direto e prático.`;
             <strong>Erro:</strong> {error}
             <br />
             <span className="text-sm text-rose-200">Abra o Console (F12) para mais detalhes</span>
+            {error.includes('DEEPSEEK_API_KEY') && (
+              <div className="mt-2 text-sm">
+                <p>📝 Configure a variável de ambiente:</p>
+                <ol className="list-decimal ml-4 mt-1">
+                  <li>Dashboard → Settings → Environment Variables</li>
+                  <li>Nome: <code>DEEPSEEK_API_KEY</code></li>
+                  <li>Valor: Sua chave API do DeepSeek</li>
+                </ol>
+              </div>
+            )}
           </AlertDescription>
         </Alert>
       )}
