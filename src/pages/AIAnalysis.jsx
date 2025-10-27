@@ -1,23 +1,26 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, AlertTriangle, Lightbulb, Download } from "lucide-react";
+import { Sparkles, TrendingUp, AlertTriangle, Lightbulb, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { deepseekAnalysis, getDeepSeekKey } from "../components/utils/deepseekClient";
 
 import SavingsSimulator from "../components/analysis/SavingsSimulator";
+import DeepSeekConfig from "../components/settings/DeepSeekConfig";
 
 export default function AIAnalysis() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [showConfig, setShowConfig] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
@@ -40,6 +43,13 @@ export default function AIAnalysis() {
   });
 
   const generateAnalysis = async () => {
+    // Verificar se a chave está configurada
+    if (!getDeepSeekKey()) {
+      setShowConfig(true);
+      setError('Configure sua chave API do DeepSeek primeiro');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
@@ -77,7 +87,7 @@ export default function AIAnalysis() {
         .map(([cat, val]) => `- ${cat}: R$ ${val.toFixed(2)}`)
         .join('\n') || '- Nenhum gasto registrado';
 
-      const prompt = `Analise esta situação financeira e forneça insights em português brasileiro:
+      const prompt = `Analise esta situação financeira e forneça insights DETALHADOS em português brasileiro:
 
 DADOS FINANCEIROS:
 - Salário líquido mensal: R$ ${user?.net_salary || 10000}
@@ -90,8 +100,7 @@ DADOS FINANCEIROS:
 PRINCIPAIS CATEGORIAS DE GASTOS:
 ${topCategories}
 
-Por favor, forneça uma análise completa em formato JSON com os seguintes campos:
-
+Retorne um JSON com esta estrutura EXATA:
 {
   "financial_health": "Avaliação da saúde financeira atual em 2-3 frases diretas e objetivas",
   "future_projection": "Projeção realista para os próximos 6 meses baseada no padrão atual",
@@ -105,8 +114,7 @@ Seja direto, prático e motivacional.`;
 
       console.log('🚀 Chamando DeepSeek...');
 
-      // Chamar função backend com DeepSeek
-      const result = await base44.functions.deepseek_analysis({
+      const result = await deepseekAnalysis({
         prompt,
         schema: true
       });
@@ -135,12 +143,20 @@ Seja direto, prático e motivacional.`;
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">✨ Análise Inteligente</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">✨ Análise Inteligente DeepSeek</h1>
           <p className="text-purple-300">
             Insights e recomendações personalizadas com IA
           </p>
         </div>
         <div className="flex gap-3">
+          <Button
+            onClick={() => setShowConfig(!showConfig)}
+            variant="outline"
+            className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Configurar API
+          </Button>
           <Button
             onClick={generateAnalysis}
             disabled={loading}
@@ -152,35 +168,34 @@ Seja direto, prático e motivacional.`;
         </div>
       </motion.div>
 
+      {showConfig && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <DeepSeekConfig />
+        </motion.div>
+      )}
+
       {error && (
         <Alert className="bg-rose-500/20 border-rose-500/50">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-white">
             <strong>Erro:</strong> {error}
-            <br />
-            <span className="text-sm text-rose-200">Abra o Console (F12) para mais detalhes</span>
-            {error.includes('DEEPSEEK_API_KEY') && (
-              <div className="mt-2 text-sm">
-                <p>📝 Configure a variável de ambiente:</p>
-                <ol className="list-decimal ml-4 mt-1">
-                  <li>Dashboard → Settings → Environment Variables</li>
-                  <li>Nome: <code>DEEPSEEK_API_KEY</code></li>
-                  <li>Valor: Sua chave API do DeepSeek</li>
-                </ol>
-              </div>
-            )}
           </AlertDescription>
         </Alert>
       )}
 
-      {!analysis && !loading && !error && (
+      {!analysis && !loading && !error && !showConfig && (
         <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/30 p-12">
           <div className="text-center space-y-4">
             <Sparkles className="w-16 h-16 mx-auto text-purple-400" />
             <h3 className="text-2xl font-bold text-white">Pronto para análise profunda?</h3>
             <p className="text-purple-300 max-w-md mx-auto">
-              Clique em "Gerar Análise" para receber insights personalizados sobre suas finanças,
-              projeções futuras e recomendações de IA.
+              {getDeepSeekKey() 
+                ? 'Clique em "Gerar Análise" para receber insights personalizados sobre suas finanças'
+                : 'Configure sua chave API do DeepSeek primeiro clicando em "Configurar API"'
+              }
             </p>
           </div>
         </Card>

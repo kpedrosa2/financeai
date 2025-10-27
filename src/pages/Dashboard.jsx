@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -90,10 +91,20 @@ export default function Dashboard() {
     .filter(t => t.type === 'despesa')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Gerar insights com IA
+  // Gerar insights com DeepSeek IA
   const generateAIInsights = async () => {
     setLoadingInsights(true);
     try {
+      // Importar o cliente DeepSeek
+      const { deepseekAnalysis, getDeepSeekKey } = await import("../components/utils/deepseekClient");
+      
+      // Verificar se tem chave configurada
+      if (!getDeepSeekKey()) {
+        console.log('DeepSeek não configurado, pulando insights');
+        setLoadingInsights(false);
+        return;
+      }
+
       const prompt = `
 Analise esta situação financeira e forneça insights:
 
@@ -117,24 +128,18 @@ ${Object.entries(
   .map(([cat, val]) => `- ${cat}: R$ ${val.toFixed(2)}`)
   .join('\n')}
 
-Forneça 4 insights curtos e acionáveis sobre:
-1. Alerta sobre gastos excessivos
-2. Recomendação de economia
-3. Estratégia para dívidas
-4. Projeção financeira
+Retorne um JSON com:
+{
+  "alert": "Alerta sobre gastos excessivos",
+  "saving_tip": "Recomendação de economia",
+  "debt_strategy": "Estratégia para dívidas",
+  "projection": "Projeção financeira"
+}
 `;
 
-      const result = await base44.integrations.Core.InvokeLLM({
+      const result = await deepseekAnalysis({
         prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            alert: { type: "string" },
-            saving_tip: { type: "string" },
-            debt_strategy: { type: "string" },
-            projection: { type: "string" }
-          }
-        }
+        schema: true
       });
 
       setAiInsights(result);
