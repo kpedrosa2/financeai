@@ -3,7 +3,7 @@ import Transactions from './pages/Transactions';
 import Debts from './pages/Debts';
 import Goals from './pages/Goals';
 import AIAnalysis from './pages/AIAnalysis';
-import Layout from './Layout.jsx';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -17,5 +17,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Dashboard",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };

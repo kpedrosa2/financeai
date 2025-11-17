@@ -1,24 +1,20 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, AlertTriangle, Lightbulb, Settings } from "lucide-react";
+import { Sparkles, TrendingUp, AlertTriangle, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { deepseekAnalysis, getDeepSeekKey } from "../components/utils/deepseekClient";
 
 import SavingsSimulator from "../components/analysis/SavingsSimulator";
-import DeepSeekConfig from "../components/settings/DeepSeekConfig";
 
 export default function AIAnalysis() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [showConfig, setShowConfig] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -43,22 +39,6 @@ export default function AIAnalysis() {
   });
 
   const generateAnalysis = async () => {
-    // Verificar se a chave está configurada
-    if (!getDeepSeekKey()) {
-      setShowConfig(true);
-      setError('Configure sua chave API do DeepSeek primeiro');
-      return;
-    }
-
-    // Confirmar antes de fazer análise (custa créditos)
-    const confirmar = window.confirm(
-      '💰 Esta análise custará aproximadamente $0.001 USD.\n\n' +
-      'Seu saldo no DeepSeek precisa ter créditos.\n\n' +
-      'Deseja continuar?'
-    );
-
-    if (!confirmar) return;
-
     setLoading(true);
     setError(null);
     
@@ -121,34 +101,29 @@ Retorne um JSON com esta estrutura EXATA:
 
 Seja direto, prático e motivacional.`;
 
-      console.log('🚀 Chamando DeepSeek...');
+      console.log('🚀 Chamando Base44 IA...');
 
-      const result = await deepseekAnalysis({
+      const result = await base44.integrations.Core.InvokeLLM({
         prompt,
-        schema: true
+        response_json_schema: {
+          type: "object",
+          properties: {
+            financial_health: { type: "string" },
+            future_projection: { type: "string" },
+            savings_recommendations: { type: "string" },
+            debt_strategy: { type: "string" },
+            goal_plan: { type: "string" },
+            investment_opportunities: { type: "string" }
+          }
+        }
       });
 
-      console.log('✅ Resposta DeepSeek:', result);
-
-      if (!result || typeof result !== 'object') {
-        throw new Error('Resposta inválida da IA');
-      }
-
+      console.log('✅ Resposta IA:', result);
       setAnalysis(result);
 
     } catch (error) {
       console.error('❌ Erro:', error);
-      
-      // Mensagem de erro mais clara
-      if (error.message.includes('Insufficient Balance')) {
-        setError(
-          '💳 Saldo insuficiente no DeepSeek!\n\n' +
-          'Adicione créditos em: https://platform.deepseek.com/billing\n' +
-          'Apenas $5 USD dá para centenas de análises!'
-        );
-      } else {
-        setError(error.message || 'Erro ao gerar análise');
-      }
+      setError(error.message || 'Erro ao gerar análise');
     } finally {
       setLoading(false);
     }
@@ -162,39 +137,20 @@ Seja direto, prático e motivacional.`;
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">✨ Análise Inteligente DeepSeek</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">✨ Análise Inteligente</h1>
           <p className="text-purple-300">
             Insights e recomendações personalizadas com IA
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => setShowConfig(!showConfig)}
-            variant="outline"
-            className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Configurar API
-          </Button>
-          <Button
-            onClick={generateAnalysis}
-            disabled={loading}
-            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/50"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            {loading ? 'Analisando...' : 'Gerar Análise'}
-          </Button>
-        </div>
-      </motion.div>
-
-      {showConfig && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <Button
+          onClick={generateAnalysis}
+          disabled={loading}
+          className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/50"
         >
-          <DeepSeekConfig />
-        </motion.div>
-      )}
+          <Sparkles className="w-4 h-4 mr-2" />
+          {loading ? 'Analisando...' : 'Gerar Análise'}
+        </Button>
+      </motion.div>
 
       {error && (
         <Alert className="bg-rose-500/20 border-rose-500/50">
@@ -205,16 +161,13 @@ Seja direto, prático e motivacional.`;
         </Alert>
       )}
 
-      {!analysis && !loading && !error && !showConfig && (
+      {!analysis && !loading && !error && (
         <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/30 p-12">
           <div className="text-center space-y-4">
             <Sparkles className="w-16 h-16 mx-auto text-purple-400" />
             <h3 className="text-2xl font-bold text-white">Pronto para análise profunda?</h3>
             <p className="text-purple-300 max-w-md mx-auto">
-              {getDeepSeekKey() 
-                ? 'Clique em "Gerar Análise" para receber insights personalizados sobre suas finanças'
-                : 'Configure sua chave API do DeepSeek primeiro clicando em "Configurar API"'
-              }
+              Clique em "Gerar Análise" para receber insights personalizados sobre suas finanças
             </p>
           </div>
         </Card>
