@@ -347,7 +347,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, isPro
           </CardContent>
 
           <CardFooter className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onCancel} className="border-white/10 text-white">
+            <Button type="button" variant="outline" onClick={onCancel} className="border-white/30 text-white bg-white/10 hover:bg-white/20 hover:text-white">
               Cancelar
             </Button>
             <Button
