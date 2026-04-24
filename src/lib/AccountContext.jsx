@@ -12,12 +12,9 @@ export function AccountProvider({ children }) {
     try {
       const me = await base44.auth.me();
       setUser(me);
-      const allAccounts = await base44.entities.SharedAccount.list();
-      const myAccount = allAccounts.find(a =>
-        a.owner_email === me.email ||
-        (a.member_emails || []).includes(me.email)
-      );
-      setAccount(myAccount || null);
+      // Use backend function to bypass RLS — members can see the owner's account
+      const res = await base44.functions.invoke('getMyAccount', {});
+      setAccount(res.data?.account || null);
     } catch (e) {
       console.error('AccountContext error:', e);
     } finally {
