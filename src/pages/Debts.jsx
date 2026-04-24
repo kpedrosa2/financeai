@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -85,7 +84,7 @@ export default function Debts() {
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">💳 Gestão de Dívidas</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">💳 Gestão de Dívidas</h1>
           <p className="text-purple-300">
             Controle e planeje a quitação das suas dívidas
           </p>

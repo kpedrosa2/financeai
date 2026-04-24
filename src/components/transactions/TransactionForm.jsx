@@ -157,9 +157,9 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, isPro
       exit={{ opacity: 0, y: -20 }}
     >
       <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-white">
+            <CardTitle className="text-white text-lg">
               {transaction ? 'Editar Transação' : 'Nova Transação'}
             </CardTitle>
             <Button variant="ghost" size="icon" onClick={onCancel}>
@@ -170,7 +170,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, isPro
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="description" className="text-purple-300">Descrição</Label>
                 <Input

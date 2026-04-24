@@ -10,7 +10,7 @@ export default function TransactionFilters({ filters, onFilterChange }) {
   return (
     <Card className="bg-white/5 backdrop-blur-xl border-white/10">
       <CardContent className="pt-6">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <div className="space-y-2">
             <Label className="text-purple-300">Tipo</Label>
             <Select value={filters.type} onValueChange={(value) => onFilterChange({ ...filters, type: value })}>
