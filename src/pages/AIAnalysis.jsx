@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAccount } from "@/lib/AccountContext";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Sparkles, TrendingUp, AlertTriangle, Lightbulb } from "lucide-react";
@@ -11,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import SavingsSimulator from "../components/analysis/SavingsSimulator";
 
 export default function AIAnalysis() {
+  const { account } = useAccount();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,20 +23,23 @@ export default function AIAnalysis() {
   }, []);
 
   const { data: transactions = [] } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: () => base44.entities.Transaction.list('-date'),
+    queryKey: ['transactions', account?.id],
+    queryFn: () => account ? base44.entities.Transaction.filter({ account_id: account.id }, '-date') : [],
+    enabled: !!account,
     initialData: [],
   });
 
   const { data: debts = [] } = useQuery({
-    queryKey: ['debts'],
-    queryFn: () => base44.entities.Debt.list(),
+    queryKey: ['debts', account?.id],
+    queryFn: () => account ? base44.entities.Debt.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 
   const { data: goals = [] } = useQuery({
-    queryKey: ['goals'],
-    queryFn: () => base44.entities.Goal.list(),
+    queryKey: ['goals', account?.id],
+    queryFn: () => account ? base44.entities.Goal.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 

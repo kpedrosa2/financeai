@@ -1,0 +1,25 @@
+{
+  "name": "SharedAccount",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome da conta compartilhada (ex: Minha Casa, Fam\u00edlia Silva)"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Email do administrador/dono da conta"
+    },
+    "member_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Emails dos membros autorizados"
+    }
+  },
+  "required": [
+    "name",
+    "owner_email"
+  ]
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAccount } from "@/lib/AccountContext";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
@@ -27,6 +28,7 @@ import RecentTransactions from "../components/dashboard/RecentTransactions";
 import MonthlyOverview from "../components/dashboard/MonthlyOverview";
 
 export default function Dashboard() {
+  const { account } = useAccount();
   const [user, setUser] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
@@ -45,20 +47,23 @@ export default function Dashboard() {
   }, []);
 
   const { data: transactions = [], isLoading: loadingTransactions } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: () => base44.entities.Transaction.list('-date'),
+    queryKey: ['transactions', account?.id],
+    queryFn: () => account ? base44.entities.Transaction.filter({ account_id: account.id }, '-date') : [],
+    enabled: !!account,
     initialData: [],
   });
 
   const { data: debts = [], isLoading: loadingDebts } = useQuery({
-    queryKey: ['debts'],
-    queryFn: () => base44.entities.Debt.list(),
+    queryKey: ['debts', account?.id],
+    queryFn: () => account ? base44.entities.Debt.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 
   const { data: goals = [], isLoading: loadingGoals } = useQuery({
-    queryKey: ['goals'],
-    queryFn: () => base44.entities.Goal.list(),
+    queryKey: ['goals', account?.id],
+    queryFn: () => account ? base44.entities.Goal.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 

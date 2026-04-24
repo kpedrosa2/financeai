@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAccount } from "@/lib/AccountContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Filter, Download, TrendingUp, Upload } from "lucide-react"; // Added Upload icon
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import InvestmentSection from "../components/transactions/InvestmentSection";
 import ImportTransactions from "../components/transactions/ImportTransactions"; // Assuming this component exists
 
 export default function Transactions() {
+  const { account } = useAccount();
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false); // New state for import modal
   const [editingTransaction, setEditingTransaction] = useState(null);
@@ -30,20 +32,23 @@ export default function Transactions() {
   const queryClient = useQueryClient();
 
   const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: () => base44.entities.Transaction.list('-date'),
+    queryKey: ['transactions', account?.id],
+    queryFn: () => account ? base44.entities.Transaction.filter({ account_id: account.id }, '-date') : [],
+    enabled: !!account,
     initialData: [],
   });
 
   const { data: investments = [], isLoading: loadingInvestments } = useQuery({
-    queryKey: ['investments'],
-    queryFn: () => base44.entities.Investment.list('-application_date'),
+    queryKey: ['investments', account?.id],
+    queryFn: () => account ? base44.entities.Investment.filter({ account_id: account.id }, '-application_date') : [],
+    enabled: !!account,
     initialData: [],
   });
 
   const { data: debts = [], isLoading: loadingDebts } = useQuery({
-    queryKey: ['debts'],
-    queryFn: () => base44.entities.Debt.list(),
+    queryKey: ['debts', account?.id],
+    queryFn: () => account ? base44.entities.Debt.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 
@@ -94,7 +99,7 @@ export default function Transactions() {
         });
       }
 
-      await Promise.all(transactions.map(t => base44.entities.Transaction.create(t)));
+      await Promise.all(transactions.map(t => base44.entities.Transaction.create({ ...t, account_id: account?.id })));
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       setShowForm(false);
       return;
@@ -112,6 +117,7 @@ export default function Transactions() {
 
         installments.push({
           ...data,
+          account_id: account?.id,
           date: installmentDate.toISOString().split('T')[0],
           installment_number: i + 1,
           parent_transaction_id: parentId,
@@ -126,7 +132,7 @@ export default function Transactions() {
     }
 
     // Transação simples
-    createMutation.mutate(data);
+    createMutation.mutate({ ...data, account_id: account?.id });
   };
 
   const handleEdit = (transaction) => {

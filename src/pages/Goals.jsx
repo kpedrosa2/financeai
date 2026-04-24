@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAccount } from "@/lib/AccountContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,16 @@ import GoalProgress from "../components/goals/GoalProgress";
 import { formatCurrency } from "../components/utils/formatters";
 
 export default function Goals() {
+  const { account } = useAccount();
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
 
   const queryClient = useQueryClient();
 
   const { data: goals = [], isLoading } = useQuery({
-    queryKey: ['goals'],
-    queryFn: () => base44.entities.Goal.list(),
+    queryKey: ['goals', account?.id],
+    queryFn: () => account ? base44.entities.Goal.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 
@@ -53,7 +55,7 @@ export default function Goals() {
     if (editingGoal) {
       updateMutation.mutate({ id: editingGoal.id, data });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate({ ...data, account_id: account?.id });
     }
   };
 

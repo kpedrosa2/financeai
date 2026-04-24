@@ -12,6 +12,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import { useAccount } from "@/lib/AccountContext";
 import {
   Sidebar,
   SidebarContent,
@@ -55,16 +56,17 @@ const navigationItems = [
     url: createPageUrl("AIAnalysis"),
     icon: Sparkles,
   },
+  {
+    title: "Configurações",
+    url: "/Settings",
+    icon: Settings,
+  },
 ];
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
-  const [user, setUser] = React.useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
+  const { user, account } = useAccount();
 
   return (
     <SidebarProvider>
@@ -120,6 +122,12 @@ export default function Layout({ children, currentPageName }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-white/10 p-4">
+            {account && (
+              <div className="mb-3 px-1">
+                <p className="text-xs text-purple-400">Grupo financeiro</p>
+                <p className="text-sm font-semibold text-purple-200 truncate">🏠 {account.name}</p>
+              </div>
+            )}
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">

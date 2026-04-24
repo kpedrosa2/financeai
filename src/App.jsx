@@ -10,6 +10,8 @@ import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { AccountProvider, AccountGuard } from '@/lib/AccountContext';
+import Settings from './pages/Settings';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -46,15 +48,20 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <LayoutWrapper currentPageName={mainPageKey}>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        {Object.entries(Pages).map(([path, Page]) => (
-          <Route key={path} path={`/${path}`} element={<Page />} />
-        ))}
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </LayoutWrapper>
+    <AccountProvider>
+      <AccountGuard>
+        <LayoutWrapper currentPageName={mainPageKey}>
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            {Object.entries(Pages).map(([path, Page]) => (
+              <Route key={path} path={`/${path}`} element={<Page />} />
+            ))}
+            <Route path="/Settings" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        </LayoutWrapper>
+      </AccountGuard>
+    </AccountProvider>
   );
 };
 

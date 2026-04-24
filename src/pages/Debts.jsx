@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAccount } from "@/lib/AccountContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import DebtStrategy from "../components/debts/DebtStrategy";
 import { formatCurrency } from "../components/utils/formatters";
 
 export default function Debts() {
+  const { account } = useAccount();
   const [showForm, setShowForm] = useState(false);
   const [editingDebt, setEditingDebt] = useState(null);
   const [selectedDebt, setSelectedDebt] = useState(null);
@@ -20,8 +22,9 @@ export default function Debts() {
   const queryClient = useQueryClient();
 
   const { data: debts = [], isLoading } = useQuery({
-    queryKey: ['debts'],
-    queryFn: () => base44.entities.Debt.list(),
+    queryKey: ['debts', account?.id],
+    queryFn: () => account ? base44.entities.Debt.filter({ account_id: account.id }) : [],
+    enabled: !!account,
     initialData: [],
   });
 
@@ -54,7 +57,7 @@ export default function Debts() {
     if (editingDebt) {
       updateMutation.mutate({ id: editingDebt.id, data });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate({ ...data, account_id: account?.id });
     }
   };
 

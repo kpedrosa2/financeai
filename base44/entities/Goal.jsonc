@@ -1,0 +1,55 @@
+{
+  "name": "Goal",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "description": "ID da conta compartilhada"
+    },
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo da meta"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da meta"
+    },
+    "target_amount": {
+      "type": "number",
+      "description": "Valor alvo"
+    },
+    "current_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor atual economizado"
+    },
+    "monthly_contribution": {
+      "type": "number",
+      "description": "Contribui\u00e7\u00e3o mensal planejada"
+    },
+    "target_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data alvo"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "em_andamento",
+        "concluida",
+        "pausada"
+      ],
+      "default": "em_andamento",
+      "description": "Status da meta"
+    },
+    "icon": {
+      "type": "string",
+      "description": "\u00cdcone da meta"
+    }
+  },
+  "required": [
+    "title",
+    "target_amount",
+    "target_date"
+  ]
+}

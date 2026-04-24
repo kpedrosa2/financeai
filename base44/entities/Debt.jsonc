@@ -1,0 +1,61 @@
+{
+  "name": "Debt",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "description": "ID da conta compartilhada"
+    },
+    "bank_name": {
+      "type": "string",
+      "description": "Nome do banco ou credor"
+    },
+    "original_amount": {
+      "type": "number",
+      "description": "Valor original da d\u00edvida"
+    },
+    "current_amount": {
+      "type": "number",
+      "description": "Valor atual da d\u00edvida"
+    },
+    "interest_rate": {
+      "type": "number",
+      "description": "Taxa de juros mensal (%)"
+    },
+    "installments": {
+      "type": "number",
+      "description": "N\u00famero de parcelas"
+    },
+    "installments_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Parcelas j\u00e1 pagas"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de vencimento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativa",
+        "quitada",
+        "atrasada"
+      ],
+      "default": "ativa",
+      "description": "Status da d\u00edvida"
+    },
+    "priority": {
+      "type": "number",
+      "description": "Prioridade de pagamento"
+    }
+  },
+  "required": [
+    "bank_name",
+    "original_amount",
+    "current_amount",
+    "interest_rate",
+    "due_date"
+  ]
+}
