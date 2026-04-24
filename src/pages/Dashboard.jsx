@@ -11,7 +11,9 @@ import {
   Target,
   AlertTriangle,
   Sparkles,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,12 +29,16 @@ import AIInsights from "../components/dashboard/AIInsights";
 import RecentTransactions from "../components/dashboard/RecentTransactions";
 import MonthlyOverview from "../components/dashboard/MonthlyOverview";
 
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
 export default function Dashboard() {
   const { account } = useAccount();
   const [user, setUser] = useState(null);
   const [aiInsights, setAiInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [showIncome, setShowIncome] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -67,13 +73,20 @@ export default function Dashboard() {
     initialData: [],
   });
 
+  const navigateMonth = (dir) => {
+    let m = selectedMonth + dir;
+    let y = selectedYear;
+    if (m > 11) { m = 0; y++; }
+    if (m < 0) { m = 11; y--; }
+    setSelectedMonth(m);
+    setSelectedYear(y);
+    setAiInsights(null);
+  };
+
   // Calcular métricas
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  
   const monthTransactions = transactions.filter(t => {
-    const date = new Date(t.date);
-    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    const date = new Date(t.date + 'T12:00:00');
+    return date.getMonth() === selectedMonth && date.getFullYear() === selectedYear;
   });
 
   const monthlyIncome = monthTransactions
@@ -186,17 +199,40 @@ Retorne um JSON com:
             Olá, {user?.full_name?.split(' ')[0] || 'Usuário'}! 👋
           </h1>
           <p className="text-purple-300">
-            Aqui está seu resumo financeiro de {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+            Aqui está seu resumo financeiro de {MONTHS[selectedMonth]} de {selectedYear}
           </p>
         </div>
-        <Button
-          onClick={generateAIInsights}
-          disabled={loadingInsights}
-          className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/50"
-        >
-          <Sparkles className="w-4 h-4 mr-2" />
-          {loadingInsights ? 'Analisando...' : 'Análise IA'}
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Seletor de mês */}
+          <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 px-2 py-1">
+            <button
+              onClick={() => navigateMonth(-1)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-purple-300 hover:text-white transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-1.5 px-2">
+              <Calendar className="w-4 h-4 text-purple-400" />
+              <span className="text-white font-medium text-sm min-w-[110px] text-center">
+                {MONTHS[selectedMonth]} {selectedYear}
+              </span>
+            </div>
+            <button
+              onClick={() => navigateMonth(1)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-purple-300 hover:text-white transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <Button
+            onClick={generateAIInsights}
+            disabled={loadingInsights}
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/50"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            {loadingInsights ? 'Analisando...' : 'Análise IA'}
+          </Button>
+        </div>
       </motion.div>
 
       <motion.div
