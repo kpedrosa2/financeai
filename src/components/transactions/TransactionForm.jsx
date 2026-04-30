@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, Save } from "lucide-react";
+import { X, Save, ChevronDown } from "lucide-react";
 
 const categories = {
   "Alimentação": [
@@ -124,6 +124,97 @@ const categories = {
   ]
 };
 
+// Flat list of all categories for search
+const allCategoryItems = Object.entries(categories).flatMap(([group, items]) =>
+  items.map(item => ({ ...item, group }))
+);
+
+function CategoryAutocomplete({ value, onChange }) {
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const selectedItem = allCategoryItems.find(i => i.value === value);
+
+  const filtered = search.trim() === ""
+    ? allCategoryItems
+    : allCategoryItems.filter(i =>
+        i.label.toLowerCase().includes(search.toLowerCase()) ||
+        i.group.toLowerCase().includes(search.toLowerCase())
+      );
+
+  // Group filtered results
+  const grouped = filtered.reduce((acc, item) => {
+    if (!acc[item.group]) acc[item.group] = [];
+    acc[item.group].push(item);
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (item) => {
+    onChange(item.value);
+    setOpen(false);
+    setSearch("");
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div
+        className="flex items-center bg-white/5 border border-white/10 rounded-md px-3 py-2 cursor-pointer text-white"
+        onClick={() => { setOpen(true); setSearch(""); }}
+      >
+        <span className={`flex-1 text-sm ${selectedItem ? "text-white" : "text-gray-400"}`}>
+          {open
+            ? <input
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar categoria..."
+                className="bg-transparent outline-none w-full text-white placeholder-gray-400"
+                onClick={e => e.stopPropagation()}
+              />
+            : (selectedItem ? `${selectedItem.group} › ${selectedItem.label}` : "Selecione a categoria")
+          }
+        </span>
+        <ChevronDown className="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" />
+      </div>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-slate-900 border border-white/10 rounded-md shadow-xl max-h-64 overflow-y-auto">
+          {Object.keys(grouped).length === 0 ? (
+            <div className="px-3 py-2 text-sm text-gray-400">Nenhuma categoria encontrada</div>
+          ) : (
+            Object.entries(grouped).map(([group, items]) => (
+              <div key={group}>
+                <div className="px-3 py-1.5 text-xs font-semibold text-purple-400 bg-white/5 sticky top-0">{group}</div>
+                {items.map(item => (
+                  <div
+                    key={item.value}
+                    onMouseDown={() => handleSelect(item)}
+                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-purple-500/20 ${value === item.value ? "text-purple-300 font-medium" : "text-white"}`}
+                  >
+                    {item.label}
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TransactionForm({ transaction, onSubmit, onCancel, isProcessing }) {
   const [formData, setFormData] = useState(transaction || {
     description: "",
@@ -224,24 +315,11 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, isPro
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="category" className="text-purple-300">Categoria</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[400px]">
-                    {Object.entries(categories).map(([group, items]) => (
-                      <div key={group}>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-purple-400">{group}</div>
-                        {items.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </div>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label className="text-purple-300">Categoria</Label>
+                <CategoryAutocomplete
+                  value={formData.category}
+                  onChange={(value) => setFormData({ ...formData, category: value })}
+                />
               </div>
 
               <div className="space-y-2">
