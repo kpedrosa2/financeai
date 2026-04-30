@@ -9,71 +9,58 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { X, Save } from "lucide-react";
 
 const categories = {
+  "Alimentação": [
+    { value: "acougue", label: "Açougue" },
+    { value: "delivery", label: "Delivery" },
+    { value: "feira", label: "Feira / Sacolão" },
+    { value: "hortifruti", label: "Hortifruti" },
+    { value: "lanches", label: "Lanches / Fast Food" },
+    { value: "padaria", label: "Padaria" },
+    { value: "restaurantes", label: "Restaurantes" },
+    { value: "supermercado", label: "Supermercado" }
+  ],
+  "Casa e Manutenção": [
+    { value: "eletrodomesticos", label: "Eletrodomésticos" },
+    { value: "limpeza", label: "Produtos de limpeza" },
+    { value: "moveis", label: "Móveis / Decoração" },
+    { value: "reparos", label: "Reparos / Materiais" },
+    { value: "utensilios", label: "Utensílios domésticos" }
+  ],
+  "Compras Pessoais": [
+    { value: "acessorios", label: "Acessórios" },
+    { value: "calcados", label: "Calçados" },
+    { value: "cosmeticos", label: "Cosméticos / Perfumaria" },
+    { value: "eletronicos", label: "Eletrônicos" },
+    { value: "presentes", label: "Presentes" },
+    { value: "roupas", label: "Roupas" }
+  ],
   "Despesas Fixas": [
+    { value: "agua", label: "Água e esgoto" },
     { value: "aluguel_financiamento", label: "Aluguel / Financiamento" },
     { value: "condominio", label: "Condomínio" },
     { value: "energia", label: "Energia elétrica" },
-    { value: "agua", label: "Água e esgoto" },
     { value: "internet", label: "Internet" },
-    { value: "telefone", label: "Telefone / Celular" },
-    { value: "tv_assinatura", label: "TV por assinatura" },
     { value: "ipva_iptu", label: "IPVA / IPTU" },
-    { value: "seguros", label: "Seguros" }
+    { value: "seguros", label: "Seguros" },
+    { value: "telefone", label: "Telefone / Celular" },
+    { value: "tv_assinatura", label: "TV por assinatura" }
   ],
-  "Alimentação": [
-    { value: "supermercado", label: "Supermercado" },
-    { value: "padaria", label: "Padaria" },
-    { value: "acougue", label: "Açougue" },
-    { value: "hortifruti", label: "Hortifruti" },
-    { value: "feira", label: "Feira / Sacolão" },
-    { value: "restaurantes", label: "Restaurantes" },
-    { value: "lanches", label: "Lanches / Fast Food" },
-    { value: "delivery", label: "Delivery" }
-  ],
-  "Transporte": [
-    { value: "combustivel", label: "Combustível" },
-    { value: "manutencao_veiculo", label: "Manutenção do veículo" },
-    { value: "estacionamento", label: "Estacionamento" },
-    { value: "pedagio", label: "Pedágio" },
-    { value: "transporte_publico", label: "Transporte público" },
-    { value: "uber_99", label: "Uber / 99" },
-    { value: "seguro_carro", label: "Seguro do carro" },
-    { value: "documentacao_veiculo", label: "Documentação / IPVA" }
-  ],
-  "Saúde": [
-    { value: "plano_saude", label: "Plano de saúde" },
-    { value: "farmacia", label: "Farmácia" },
-    { value: "consultas", label: "Consultas médicas" },
-    { value: "exames", label: "Exames" },
-    { value: "odontologia", label: "Odontologia" },
-    { value: "academia", label: "Academia / Personal" }
-  ],
-  "Compras Pessoais": [
-    { value: "roupas", label: "Roupas" },
-    { value: "calcados", label: "Calçados" },
-    { value: "acessorios", label: "Acessórios" },
-    { value: "cosmeticos", label: "Cosméticos / Perfumaria" },
-    { value: "eletronicos", label: "Eletrônicos" },
-    { value: "presentes", label: "Presentes" }
-  ],
-  "Casa e Manutenção": [
-    { value: "limpeza", label: "Produtos de limpeza" },
-    { value: "utensilios", label: "Utensílios domésticos" },
-    { value: "reparos", label: "Reparos / Materiais" },
-    { value: "moveis", label: "Móveis / Decoração" },
-    { value: "eletrodomesticos", label: "Eletrodomésticos" }
+  "Doações": [
+    { value: "ajuda_familiar", label: "Ajuda a familiares" },
+    { value: "doacoes", label: "Doações a instituições" }
   ],
   "Educação": [
+    { value: "assinaturas_educacao", label: "Assinaturas educacionais" },
     { value: "cursos", label: "Cursos / Faculdades" },
     { value: "livros", label: "Livros" },
-    { value: "material_didatico", label: "Material didático" },
-    { value: "assinaturas_educacao", label: "Assinaturas educacionais" }
+    { value: "material_didatico", label: "Material didático" }
   ],
-  "Tecnologia": [
-    { value: "streaming", label: "Streaming (Netflix, Spotify)" },
-    { value: "softwares", label: "Softwares / Licenças" },
-    { value: "nuvem", label: "Serviços em nuvem" },
-    { value: "dominios", label: "Domínios / Hospedagem" }
+  "Família": [
+    { value: "baba", label: "Babá / Cuidador" },
+    { value: "brinquedos", label: "Brinquedos" },
+    { value: "escola", label: "Escola" },
+    { value: "mesada", label: "Mesada" },
+    { value: "roupas_infantis", label: "Roupas infantis" }
   ],
   "Financeiro": [
     { value: "cartao_credito", label: "Cartão de crédito" },
@@ -82,42 +69,55 @@ const categories = {
     { value: "taxas_bancarias", label: "Taxas bancárias" }
   ],
   "Lazer": [
-    { value: "viagens", label: "Viagens" },
     { value: "cinema_teatro", label: "Cinema / Teatro" },
     { value: "festas", label: "Festas / Eventos" },
+    { value: "jogos", label: "Jogos" },
     { value: "passeios", label: "Passeios" },
-    { value: "jogos", label: "Jogos" }
-  ],
-  "Família": [
-    { value: "escola", label: "Escola" },
-    { value: "roupas_infantis", label: "Roupas infantis" },
-    { value: "brinquedos", label: "Brinquedos" },
-    { value: "mesada", label: "Mesada" },
-    { value: "baba", label: "Babá / Cuidador" }
-  ],
-  "Pets": [
-    { value: "racao", label: "Ração" },
-    { value: "veterinario", label: "Veterinário" },
-    { value: "banho_tosa", label: "Banho e tosa" },
-    { value: "pets_acessorios", label: "Acessórios para pets" }
-  ],
-  "Doações": [
-    { value: "doacoes", label: "Doações a instituições" },
-    { value: "ajuda_familiar", label: "Ajuda a familiares" }
+    { value: "viagens", label: "Viagens" }
   ],
   "Negócios": [
-    { value: "escritorio", label: "Materiais de escritório" },
-    { value: "equipamentos", label: "Equipamentos" },
-    { value: "hospedagem_site", label: "Hospedagem de site" },
-    { value: "marketing", label: "Propaganda e marketing" },
-    { value: "terceirizados", label: "Serviços terceirizados" },
     { value: "consultorias", label: "Consultorias" },
-    { value: "impostos", label: "Impostos / Taxas" }
+    { value: "equipamentos", label: "Equipamentos" },
+    { value: "escritorio", label: "Materiais de escritório" },
+    { value: "hospedagem_site", label: "Hospedagem de site" },
+    { value: "impostos", label: "Impostos / Taxas" },
+    { value: "marketing", label: "Propaganda e marketing" },
+    { value: "terceirizados", label: "Serviços terceirizados" }
+  ],
+  "Pets": [
+    { value: "banho_tosa", label: "Banho e tosa" },
+    { value: "pets_acessorios", label: "Acessórios para pets" },
+    { value: "racao", label: "Ração" },
+    { value: "veterinario", label: "Veterinário" }
   ],
   "Receitas": [
-    { value: "salario", label: "Salário" },
     { value: "freelance", label: "Freelance" },
+    { value: "salario", label: "Salário" },
     { value: "vendas", label: "Vendas" }
+  ],
+  "Saúde": [
+    { value: "academia", label: "Academia / Personal" },
+    { value: "consultas", label: "Consultas médicas" },
+    { value: "exames", label: "Exames" },
+    { value: "farmacia", label: "Farmácia" },
+    { value: "odontologia", label: "Odontologia" },
+    { value: "plano_saude", label: "Plano de saúde" }
+  ],
+  "Tecnologia": [
+    { value: "dominios", label: "Domínios / Hospedagem" },
+    { value: "nuvem", label: "Serviços em nuvem" },
+    { value: "softwares", label: "Softwares / Licenças" },
+    { value: "streaming", label: "Streaming (Netflix, Spotify)" }
+  ],
+  "Transporte": [
+    { value: "combustivel", label: "Combustível" },
+    { value: "documentacao_veiculo", label: "Documentação / IPVA" },
+    { value: "estacionamento", label: "Estacionamento" },
+    { value: "manutencao_veiculo", label: "Manutenção do veículo" },
+    { value: "pedagio", label: "Pedágio" },
+    { value: "seguro_carro", label: "Seguro do carro" },
+    { value: "transporte_publico", label: "Transporte público" },
+    { value: "uber_99", label: "Uber / 99" }
   ],
   "Outros": [
     { value: "outros", label: "Outros" }
