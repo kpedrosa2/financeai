@@ -151,12 +151,12 @@ export default function Transactions() {
 
 
   const filteredTransactions = transactions.filter(t => {
-    const tDate = new Date(t.date);
+    const [year, month] = t.date.split('-').map(Number);
     const matchType = filters.type === 'all' || t.type === filters.type;
     const matchCategory = filters.category === 'all' || t.category === filters.category;
     const matchStatus = filters.status === 'all' || t.status === filters.status;
-    const matchMonth = tDate.getMonth() === filters.month;
-    const matchYear = tDate.getFullYear() === filters.year;
+    const matchMonth = (month - 1) === filters.month;
+    const matchYear = year === filters.year;
     
     return matchType && matchCategory && matchStatus && matchMonth && matchYear;
   });
