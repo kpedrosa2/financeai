@@ -20,7 +20,7 @@ export default function StatsCard({ title, value, icon: Icon, trend, trendValue,
   const TrendIcon = trendIcons[trend] || Minus;
 
   return (
-    <Card className="relative overflow-hidden bg-white/5 backdrop-blur-xl border-white/10 p-6 group hover:bg-white/10 transition-all duration-300">
+    <Card className="relative overflow-hidden bg-white/5 backdrop-blur-xl border-white/10 p-6 group hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-purple-950/25 transition-all duration-300 md:hover:-translate-y-0.5">
       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradient} opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity`} />
       
       <div className="relative z-10">
